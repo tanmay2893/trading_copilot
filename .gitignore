@@ -29,7 +29,7 @@ wheels/
 .venv/
 venv/
 ENV/
-*.mp4
+*strategy-demo.mp4
 
 # Node / Next.js
 node_modules/

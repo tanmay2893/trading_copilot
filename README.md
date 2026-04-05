@@ -2,6 +2,16 @@
 
 **Natural-language → executable backtests.** Describe a trading idea in plain English; an LLM generates a small `Strategy` class, runs it on historical OHLCV (via [yfinance](https://github.com/ranaroussi/yfinance)), and iterates until you get coherent buy/sell signals. A **Next.js** UI and **FastAPI** backend provide a chat-style copilot; the same engine powers the **CLI**.
 
+<p align="center" id="demo">
+  <video src="recordings/strategy-demo_v1.mp4" controls width="920" playsinline>
+    <a href="recordings/strategy-demo_v1.mp4">Download the strategy demo (MP4)</a>
+  </video>
+  <br /><br />
+  <sub><em>See the full loop: describe a strategy, run a backtest, read the summary, and inspect buy/sell markers on the chart.</em></sub>
+</p>
+
+---
+
 ### Compared to general-purpose assistants
 
 Versus ChatGPT and similar tools: they can **explain** indicators and **paste** code, but they do **not** run that code on **your** ticker and dates, apply a **fixed backtest harness**, or show **actual** buy/sell results on a chart. You would still copy snippets, wire data and libraries yourself, and debug outside the chat—without a single, repeatable run tied to your strategy text.
@@ -25,7 +35,7 @@ Use these as inspiration in chat or with the CLI (`--strategy "..."`). The model
 
 The Python package is **`backtester`** (`pip install -e .`, see `pyproject.toml`).
 
-[Compared to general chat](#compared-to-general-purpose-assistants) · [Sample strategies](#sample-strategies) · [Workflow](#workflow-like-claude-code-for-trading-strategies) · [Docker (preferred)](#run-with-docker-preferred) · [Run manually](#run-manually-backend--frontend) · [Web app](#web-app) · [CLI](#cli-quick-start) · [Corporate examples](#corporate-strategy-examples) · [How it works](#how-it-works) · [LLM keys](#llm-providers) · [Future improvements](#future-improvements)
+[Demo](#demo) · [Compared to general chat](#compared-to-general-purpose-assistants) · [Sample strategies](#sample-strategies) · [Workflow](#workflow-like-claude-code-for-trading-strategies) · [Docker (preferred)](#run-with-docker-preferred) · [Run manually](#run-manually-backend--frontend) · [Web app](#web-app) · [CLI](#cli-quick-start) · [Corporate examples](#corporate-strategy-examples) · [How it works](#how-it-works) · [LLM keys](#llm-providers) · [Future improvements](#future-improvements)
 
 <p align="center">
   <img src="recordings/chart-msft-demo.png" alt="Sample price chart with backtest signals" width="720" />
