@@ -7,7 +7,7 @@
 
 The Python package is **`backtester`** (`pip install -e .`, see `pyproject.toml`).
 
-[Workflow](#workflow-like-claude-code-for-trading-strategies) · [Run with Docker](#run-with-docker) · [Run manually](#run-manually-backend--frontend) · [Web app](#web-app) · [CLI](#cli-quick-start) · [How it works](#how-it-works) · [LLM keys](#llm-providers)
+[Workflow](#workflow-like-claude-code-for-trading-strategies) · [Run with Docker](#run-with-docker) · [Run manually](#run-manually-backend--frontend) · [Web app](#web-app) · [CLI](#cli-quick-start) · [Corporate examples](#corporate-strategy-examples) · [How it works](#how-it-works) · [LLM keys](#llm-providers)
 
 <p align="center">
   <img src="recordings/chart-msft-demo.png" alt="Sample price chart with backtest signals" width="720" />
@@ -177,6 +177,45 @@ backtester run \
 Or: `python -m backtester.cli run ...`
 
 Default output: `./signals_{TICKER}.csv` plus run artifacts.
+
+### Corporate strategy examples
+
+OHLCV comes from **[yfinance](https://github.com/ranaroussi/yfinance)** (Yahoo Finance). If your natural-language strategy mentions **earnings**, **dividends**, or **stock splits**, the runner **auto-detects** that and fetches the matching corporate calendars, then merges columns such as `Is_Earnings_Day`, `Days_To_Earnings`, `EPS_Surprise_Pct`, `Dividend_Amount` / `Is_Ex_Dividend`, and `Split_Ratio` / `Is_Split_Day` into the same dataframe the strategy code sees. You do not pass a separate flag—the wording of `--strategy` drives it.
+
+Below are three runnable examples (swap `--model` or tickers as you like). Longer lists of the same style live in [STRATEGIES.md](STRATEGIES.md) (corporate sections).
+
+**1. Earnings — post-earnings drift with EPS surprise**
+
+```bash
+backtester run \
+  --strategy "Buy on the first trading day after an earnings announcement if the EPS surprise percentage is positive (actual beat estimate). Sell 10 trading days later or when RSI exceeds 70, whichever comes first." \
+  --ticker MSFT \
+  --start 2020-01-01 \
+  --end 2025-01-01 \
+  --model deepseek
+```
+
+**2. Dividends — ex-dividend window**
+
+```bash
+backtester run \
+  --strategy "Buy 3 trading days before an ex-dividend date and sell on the ex-dividend date. Only enter if the dividend amount is greater than zero and the 20-day SMA is above the 50-day SMA." \
+  --ticker JNJ \
+  --start 2020-01-01 \
+  --end 2025-01-01 \
+  --model deepseek
+```
+
+**3. Stock splits — forward split continuation**
+
+```bash
+backtester run \
+  --strategy "Buy on the day of a stock split if the split ratio is greater than 1 (forward split) and the close is above the 20-day SMA. Sell 20 trading days later or when the close falls below the 20-day SMA." \
+  --ticker NVDA \
+  --start 2020-01-01 \
+  --end 2025-01-01 \
+  --model deepseek
+```
 
 ### `run` — main flags
 
