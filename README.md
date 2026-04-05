@@ -3,11 +3,19 @@
 **Natural-language → executable backtests.** Describe a trading idea in plain English; an LLM generates a small `Strategy` class, runs it on historical OHLCV (via [yfinance](https://github.com/ranaroussi/yfinance)), and iterates until you get coherent buy/sell signals. A **Next.js** UI and **FastAPI** backend provide a chat-style copilot; the same engine powers the **CLI**.
 
 <p align="center" id="demo">
-  <video src="recordings/strategy-demo_v1.mp4" controls width="920" playsinline>
-    <a href="recordings/strategy-demo_v1.mp4">Download the strategy demo (MP4)</a>
+  <video
+    src="https://raw.githubusercontent.com/tanmay2893/trading_copilot/master/recordings/strategy-demo_v1.mp4"
+    controls
+    width="920"
+    playsinline
+    preload="metadata"
+  >
+    <a href="https://raw.githubusercontent.com/tanmay2893/trading_copilot/master/recordings/strategy-demo_v1.mp4">Open the strategy demo (MP4)</a>
   </video>
   <br /><br />
   <sub><em>See the full loop: describe a strategy, run a backtest, read the summary, and inspect buy/sell markers on the chart.</em></sub>
+  <br /><br />
+  <sub>If the player does not load in the GitHub view, <a href="https://github.com/tanmay2893/trading_copilot/blob/master/recordings/strategy-demo_v1.mp4"><strong>open the demo on GitHub</strong></a> or use the raw file URL above.</sub>
 </p>
 
 ---
