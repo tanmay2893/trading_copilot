@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { fetchTickers, type Ticker } from "@/lib/api";
+import { fetchTickers, type LlmModelOption, type Ticker } from "@/lib/api";
 import { ParameterModal } from "./ParameterModal";
 import { ComplianceModal } from "./ComplianceModal";
 
@@ -43,6 +43,11 @@ interface ChatInputProps {
   chatBaseVersionLabel?: string | null;
   /** Called when user clears the chat-base attachment. */
   onClearChatBase?: () => void;
+  /** Models allowed for configured API keys (from server). */
+  llmModelOptions?: LlmModelOption[];
+  /** Selected API model id, or "" for auto. */
+  llmModelId?: string;
+  onLlmModelChange?: (modelId: string) => void;
 }
 
 export function ChatInput({
@@ -61,6 +66,9 @@ export function ChatInput({
   chatBaseVersionId = null,
   chatBaseVersionLabel = null,
   onClearChatBase,
+  llmModelOptions = [],
+  llmModelId = "",
+  onLlmModelChange,
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -369,7 +377,7 @@ export function ChatInput({
           </p>
         )}
         {/* Input row */}
-        <div className="flex items-end gap-3">
+        <div className="flex items-end gap-2 sm:gap-3">
           <textarea
             ref={textareaRef}
             value={value}
@@ -384,8 +392,27 @@ export function ChatInput({
             }
             disabled={isLoading || inputDisabled}
             rows={1}
-            className="flex-1 resize-none bg-[var(--bg-tertiary)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-50"
+            className="flex-1 min-w-0 resize-none bg-[var(--bg-tertiary)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors disabled:opacity-50"
           />
+          {onLlmModelChange && (
+            <label className="flex-shrink-0 flex flex-col gap-0.5">
+              <span className="sr-only">Model</span>
+              <select
+                value={llmModelId}
+                onChange={(e) => onLlmModelChange(e.target.value)}
+                disabled={isLoading || inputDisabled}
+                title="LLM model"
+                className="max-w-[10.5rem] sm:max-w-[12rem] rounded-xl border border-[var(--border)] bg-[var(--bg-tertiary)] px-2.5 py-2.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] disabled:opacity-50 cursor-pointer"
+              >
+                <option value="">Auto (best)</option>
+                {llmModelOptions.map((o) => (
+                  <option key={o.id} value={o.id} title={o.label}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <button
             onClick={handleSubmit}
             disabled={!value.trim() || isLoading || inputDisabled}

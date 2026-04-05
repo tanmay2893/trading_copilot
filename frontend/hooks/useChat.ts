@@ -43,19 +43,22 @@ export interface UseChatOptions {
   onDoneRef?: React.MutableRefObject<(() => void) | null>;
   /** Session model: openai | opus | deepseek — which API key Settings expects. */
   sessionModel?: string;
+  /** Empty = auto (server uses best default for resolved provider). */
+  llmModelId?: string;
 }
 
 export function useChat(sessionId: string, options?: UseChatOptions) {
   const onDoneRef = options?.onDoneRef;
   const sessionModel = (options?.sessionModel || "openai").toLowerCase();
-  const { hasKeysForModel, openSettings } = useLlmSettings();
+  const llmModelId = (options?.llmModelId ?? "").trim();
+  const { hasUsableLlmForSession, openSettings } = useLlmSettings();
 
   const guardLlmKeys = useCallback(() => {
     if (sessionId.startsWith("local-")) return true;
-    if (hasKeysForModel(sessionModel)) return true;
+    if (hasUsableLlmForSession(sessionModel)) return true;
     openSettings("Add an API key to use chat. Keys apply to all sessions.");
     return false;
-  }, [sessionId, sessionModel, hasKeysForModel, openSettings]);
+  }, [sessionId, sessionModel, hasUsableLlmForSession, openSettings]);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -325,10 +328,16 @@ export function useChat(sessionId: string, options?: UseChatOptions) {
       setSessionDateRange({ start_date: startDate, end_date: endDate });
       setIsLoading(true);
       wsRef.current.send(
-        JSON.stringify({ type: "date_range", start_date: startDate, end_date: endDate })
+        JSON.stringify({
+          type: "date_range",
+          start_date: startDate,
+          end_date: endDate,
+          model: sessionModel,
+          llm_model_id: llmModelId || "",
+        })
       );
     },
-    [connect, guardLlmKeys]
+    [connect, guardLlmKeys, sessionModel, llmModelId]
   );
 
   const dismissDateRangePicker = useCallback(() => {
@@ -363,14 +372,19 @@ export function useChat(sessionId: string, options?: UseChatOptions) {
       assistantBlocksRef.current = [];
       assistantIdRef.current = "";
 
-      const payload: Record<string, string> = { type: "message", content };
+      const payload: Record<string, string> = {
+        type: "message",
+        content,
+        model: sessionModel,
+        llm_model_id: llmModelId || "",
+      };
       if (chartImage) {
         const base64 = chartImage.startsWith("data:") ? chartImage.split(",")[1] : chartImage;
         payload.chart_image = base64;
       }
       wsRef.current.send(JSON.stringify(payload));
     },
-    [connect, guardLlmKeys]
+    [connect, guardLlmKeys, sessionModel, llmModelId]
   );
 
   const rerunOnTicker = useCallback(

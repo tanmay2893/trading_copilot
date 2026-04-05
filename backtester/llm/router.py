@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from backtester.config import MODEL_ALIASES, PROVIDER_FOR_ALIAS, cfg
 from backtester.llm.anthropic_provider import AnthropicProvider
+from backtester.llm.model_catalog import resolve_web_api_model
 from backtester.llm.base import BaseLLMProvider
 from backtester.llm.deepseek_provider import DeepSeekProvider
 from backtester.llm.openai_provider import OpenAIProvider
@@ -13,11 +14,46 @@ _PROVIDER_LABEL = {
 }
 
 
-def get_provider(model_alias: str, *, use_env_keys: bool = False) -> BaseLLMProvider:
+def _web_alias_fallback_chain(start: str) -> list[str]:
+    """Order of aliases to try when the requested provider has no web (Settings) key."""
+    s = start.lower()
+    if s == "openai":
+        return ["openai", "opus", "deepseek"]
+    if s == "opus":
+        return ["opus", "openai", "deepseek"]
+    if s == "deepseek":
+        return ["deepseek", "openai", "opus"]
+    return [s]
+
+
+def resolve_web_model_alias(requested: str) -> str:
+    """Pick the first model alias in the fallback chain that has a key in Settings (key_store).
+
+    Example: session is 'openai' but only Anthropic is configured → 'opus'.
+    If nothing is configured, returns the requested alias (get_provider will error clearly).
+    """
+    requested = (requested or "openai").lower()
+    if requested not in PROVIDER_FOR_ALIAS:
+        return requested
+    from backtester.api.key_store import get_stored_api_key
+
+    for cand in _web_alias_fallback_chain(requested):
+        if get_stored_api_key(cand).strip():
+            return cand
+    return requested
+
+
+def get_provider(
+    model_alias: str,
+    *,
+    use_env_keys: bool = False,
+    llm_model_id: str | None = None,
+) -> BaseLLMProvider:
     """Build an LLM provider for the given model alias.
 
     - use_env_keys=False (default): web API — keys come from Settings (in-memory key_store only).
     - use_env_keys=True: CLI — keys come from environment / .env via cfg.
+    - llm_model_id: optional API model id (web only); must be allowlisted for the resolved provider.
     """
     alias = model_alias.lower()
     if alias not in PROVIDER_FOR_ALIAS:
@@ -25,6 +61,7 @@ def get_provider(model_alias: str, *, use_env_keys: bool = False) -> BaseLLMProv
             f"Unknown model alias '{model_alias}'. Use one of: {list(PROVIDER_FOR_ALIAS.keys())}"
         )
     if use_env_keys:
+        effective = alias
         try:
             api_key = cfg.api_key_for(alias)
         except ValueError as e:
@@ -32,14 +69,19 @@ def get_provider(model_alias: str, *, use_env_keys: bool = False) -> BaseLLMProv
     else:
         from backtester.api.key_store import get_stored_api_key
 
-        api_key = get_stored_api_key(alias).strip()
+        effective = resolve_web_model_alias(alias)
+        api_key = get_stored_api_key(effective).strip()
         if not api_key:
-            label = _PROVIDER_LABEL.get(alias, alias)
             raise ValueError(
-                f"No {label} API key configured. Open Settings (gear) and add your API keys."
+                "No LLM API key configured. Open Settings (gear) and add at least one provider key "
+                "(OpenAI, Anthropic, or DeepSeek)."
             )
-    model = MODEL_ALIASES[alias]
-    provider_name = PROVIDER_FOR_ALIAS[alias]
+    provider_name = PROVIDER_FOR_ALIAS[effective]
+    default_id = MODEL_ALIASES[effective]
+    if use_env_keys:
+        model = default_id
+    else:
+        model = resolve_web_api_model(provider_name, effective, llm_model_id, default_id)
     if provider_name == "anthropic":
         return AnthropicProvider(api_key=api_key, model=model)
     if provider_name == "openai":

@@ -70,6 +70,8 @@ class ChatSession:
     active_interval: str | None = None
     run_history: list[RunSummary] = field(default_factory=list)
     model: str = "openai"
+    # Optional API model id when user picks a specific model in the UI (None = use alias default / auto).
+    llm_model_id: str | None = None
     created_at: str = ""
     updated_at: str = ""
     # Date range for backtesting — set once via calendar, used for whole conversation
@@ -206,6 +208,7 @@ class ChatSession:
         data = {
             "session_id": self.session_id,
             "model": self.model,
+            "llm_model_id": self.llm_model_id,
             "title": self.title,
             "active_ticker": self.active_ticker,
             "active_strategy": self.active_strategy,
@@ -274,7 +277,10 @@ class ChatSession:
         raw.setdefault("end_date", None)
         raw.setdefault("title", None)
         raw.setdefault("chat_base_version_id", None)
-        allowed = {"session_id", "model", "title", "active_ticker", "active_strategy", "active_code",
+        raw.setdefault("llm_model_id", None)
+        if raw.get("llm_model_id") == "":
+            raw["llm_model_id"] = None
+        allowed = {"session_id", "model", "llm_model_id", "title", "active_ticker", "active_strategy", "active_code",
                    "active_interval", "created_at", "updated_at", "start_date", "end_date", "active_indicator_columns", "chat_base_version_id"}
         kwargs = {k: v for k, v in raw.items() if k in allowed}
         try:

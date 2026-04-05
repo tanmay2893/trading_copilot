@@ -1,9 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLlmSettings } from "@/context/LlmSettingsContext";
 import { useChat } from "@/hooks/useChat";
 import { estimateUsageCost, formatUsageCost } from "@/lib/usageCost";
-import { fetchCodeVersions, fetchSession, fetchStrategyVersionsAll, getBatchRerunStatus, setChatBase, startBatchRerun } from "@/lib/api";
+import {
+  fetchCodeVersions,
+  fetchLlmModelOptions,
+  fetchSession,
+  fetchStrategyVersionsAll,
+  getBatchRerunStatus,
+  setChatBase,
+  startBatchRerun,
+  type LlmModelOption,
+} from "@/lib/api";
 import type { VersionTagsMap } from "./MessageList";
 
 const BATCH_STORAGE_KEY = (sid: string) => `backtester_batch_${sid}`;
@@ -46,6 +56,9 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
   const [chatBaseVersionId, setChatBaseVersionId] = useState<string | null>(null);
   const [chatBaseVersionLabel, setChatBaseVersionLabel] = useState<string | null>(null);
   const [sessionModel, setSessionModel] = useState("openai");
+  const [llmModelId, setLlmModelId] = useState("");
+  const [llmModelOptions, setLlmModelOptions] = useState<LlmModelOption[]>([]);
+  const { status: llmKeyStatus } = useLlmSettings();
 
   const {
     messages,
@@ -67,6 +80,7 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
   } = useChat(sessionId, {
     onDoneRef: openChartOnDoneRef ?? undefined,
     sessionModel,
+    llmModelId,
   });
 
   const onLoadingChangeRef = useRef(onLoadingChange);
@@ -106,9 +120,38 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
   useEffect(() => {
     if (sessionId.startsWith("local-")) return;
     fetchSession(sessionId)
-      .then((s) => setSessionModel((s.model || "openai").toLowerCase()))
+      .then((s) => {
+        setSessionModel((s.model || "openai").toLowerCase());
+        setLlmModelId((s.llm_model_id ?? "").trim());
+      })
       .catch(() => {});
   }, [sessionId]);
+
+  useEffect(() => {
+    if (sessionId.startsWith("local-")) {
+      setLlmModelOptions([]);
+      return;
+    }
+    fetchLlmModelOptions()
+      .then((r) => setLlmModelOptions(Array.isArray(r.all) ? r.all : []))
+      .catch(() => setLlmModelOptions([]));
+  }, [
+    sessionId,
+    llmKeyStatus?.openai_configured,
+    llmKeyStatus?.anthropic_configured,
+    llmKeyStatus?.deepseek_configured,
+  ]);
+
+  const handleLlmModelChange = useCallback(
+    (id: string) => {
+      setLlmModelId(id);
+      if (id) {
+        const opt = llmModelOptions.find((o) => o.id === id);
+        if (opt) setSessionModel(opt.alias);
+      }
+    },
+    [llmModelOptions]
+  );
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -503,6 +546,9 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
         sessionId={sessionId}
         latestStrategyCode={latestStrategyCode}
         sessionDateRange={sessionDateRange}
+        llmModelOptions={llmModelOptions}
+        llmModelId={llmModelId}
+        onLlmModelChange={handleLlmModelChange}
         onSend={(msg) => {
           const screenshot = hasChartData && getChartScreenshot ? getChartScreenshot() : null;
           sendMessage(msg, screenshot);

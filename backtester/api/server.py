@@ -210,13 +210,21 @@ async def chat_ws(websocket: WebSocket, session_id: str):
             else:
                 session.pending_chart_image = None
 
-            if data.get("model") and data["model"] != session.model:
-                session.model = data["model"]
-                provider = None
+            if data.get("model") and isinstance(data["model"], str):
+                nm = data["model"].strip().lower()
+                if nm in ("openai", "opus", "deepseek") and nm != session.model:
+                    session.model = nm
+                    provider = None
+            if "llm_model_id" in data:
+                v = data.get("llm_model_id")
+                nv = v.strip() if isinstance(v, str) and v.strip() else None
+                if nv != session.llm_model_id:
+                    session.llm_model_id = nv
+                    provider = None
 
             if provider is None:
                 try:
-                    provider = get_provider(session.model)
+                    provider = get_provider(session.model, llm_model_id=session.llm_model_id)
                 except Exception as exc:
                     await websocket.send_json(ErrorEvent(message=f"LLM init failed: {exc}").to_dict())
                     await websocket.send_json(DoneEvent().to_dict())

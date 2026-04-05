@@ -88,15 +88,58 @@ async def list_sessions():
 
 @router.post("/sessions", response_model=dict)
 async def create_session(req: CreateSessionRequest):
-    session = ChatSession.new(model=req.model)
+    from backtester.llm.router import resolve_web_model_alias
+
+    model = resolve_web_model_alias(req.model)
+    session = ChatSession.new(model=model)
     session.save()
     return {"session_id": session.session_id, "model": session.model}
+
+
+def _llm_option_visible(opt: dict[str, str], flags: dict[str, bool]) -> bool:
+    a = opt.get("alias", "")
+    if a == "opus":
+        return bool(flags.get("anthropic_configured"))
+    if a == "openai":
+        return bool(flags.get("openai_configured"))
+    if a == "deepseek":
+        return bool(flags.get("deepseek_configured"))
+    return False
 
 
 @router.get("/settings/llm-keys")
 async def get_llm_keys_status():
     """Return which providers have keys configured (never returns secrets)."""
     return key_store.configured_flags()
+
+
+@router.get("/settings/llm-model-options")
+async def get_llm_model_options():
+    """Return allowlisted models for each provider that has a configured web API key."""
+    from backtester.llm.model_catalog import (
+        ANTHROPIC_MODELS,
+        DEEPSEEK_MODELS,
+        OPENAI_MODELS,
+        llm_model_options_for_web,
+    )
+
+    flags = key_store.configured_flags()
+    by_provider: dict[str, list[dict[str, str]]] = {
+        "anthropic": [{"id": mid, "label": lab, "alias": "opus"} for mid, lab in ANTHROPIC_MODELS],
+        "openai": [{"id": mid, "label": lab, "alias": "openai"} for mid, lab in OPENAI_MODELS],
+        "deepseek": [{"id": mid, "label": lab, "alias": "deepseek"} for mid, lab in DEEPSEEK_MODELS],
+    }
+    out: dict[str, list[dict[str, str]]] = {}
+    if flags.get("anthropic_configured"):
+        out["anthropic"] = by_provider["anthropic"]
+    if flags.get("openai_configured"):
+        out["openai"] = by_provider["openai"]
+    if flags.get("deepseek_configured"):
+        out["deepseek"] = by_provider["deepseek"]
+    return {
+        "by_provider": out,
+        "all": [o for o in llm_model_options_for_web() if _llm_option_visible(o, flags)],
+    }
 
 
 @router.post("/settings/llm-keys")
@@ -120,6 +163,7 @@ async def get_session(session_id: str):
     return {
         "session_id": session.session_id,
         "model": session.model,
+        "llm_model_id": session.llm_model_id,
         "title": session.title,
         "active_ticker": session.active_ticker,
         "active_strategy": session.active_strategy,
@@ -585,7 +629,7 @@ async def run_reproducibility_check(session_id: str, body: ReproducibilityReques
     from backtester.llm.router import get_provider
 
     try:
-        provider = get_provider(session.model)
+        provider = get_provider(session.model, llm_model_id=session.llm_model_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -684,7 +728,7 @@ async def generate_quiz(session_id: str, body: QuizGenerateRequest):
     strategy_description = (commands.initial_strategy if commands else None) or session.active_strategy or ""
 
     try:
-        provider = get_provider(session.model)
+        provider = get_provider(session.model, llm_model_id=session.llm_model_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

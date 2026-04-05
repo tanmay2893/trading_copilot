@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from backtester.config import MODEL_ALIASES
+
 
 def verify_openai_api_key(api_key: str) -> tuple[bool, str]:
     key = (api_key or "").strip()
@@ -44,8 +46,9 @@ def verify_anthropic_api_key(api_key: str) -> tuple[bool, str]:
         from anthropic import Anthropic
 
         client = Anthropic(api_key=key)
+        # Must match MODEL_ALIASES["opus"] — retired model IDs (e.g. claude-3-5-haiku-20241022) return 404.
         client.messages.create(
-            model="claude-3-5-haiku-20241022",
+            model=MODEL_ALIASES["opus"],
             max_tokens=1,
             messages=[{"role": "user", "content": "ok"}],
         )

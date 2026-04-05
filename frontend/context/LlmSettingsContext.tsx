@@ -24,6 +24,8 @@ type LlmSettingsContextValue = {
   closeSettings: () => void;
   settingsReason: string | null;
   hasKeysForModel: (model: string) => boolean;
+  /** True if the session's model can run using any configured key (same fallback as the API). */
+  hasUsableLlmForSession: (model: string) => boolean;
 };
 
 const LlmSettingsContext = createContext<LlmSettingsContextValue | null>(null);
@@ -97,6 +99,28 @@ export function LlmSettingsProvider({ children }: { children: ReactNode }) {
     [status]
   );
 
+  const hasUsableLlmForSession = useCallback(
+    (model: string) => {
+      if (!status) return false;
+      const m = model.toLowerCase();
+      const chain: ("openai" | "opus" | "deepseek")[] =
+        m === "openai"
+          ? ["openai", "opus", "deepseek"]
+          : m === "opus"
+            ? ["opus", "openai", "deepseek"]
+            : m === "deepseek"
+              ? ["deepseek", "openai", "opus"]
+              : [];
+      for (const x of chain) {
+        if (x === "openai" && status.openai_configured) return true;
+        if (x === "opus" && status.anthropic_configured) return true;
+        if (x === "deepseek" && status.deepseek_configured) return true;
+      }
+      return false;
+    },
+    [status]
+  );
+
   const value = useMemo(
     () => ({
       status,
@@ -106,8 +130,18 @@ export function LlmSettingsProvider({ children }: { children: ReactNode }) {
       closeSettings,
       settingsReason,
       hasKeysForModel,
+      hasUsableLlmForSession,
     }),
-    [status, refreshStatus, settingsOpen, openSettings, closeSettings, settingsReason, hasKeysForModel]
+    [
+      status,
+      refreshStatus,
+      settingsOpen,
+      openSettings,
+      closeSettings,
+      settingsReason,
+      hasKeysForModel,
+      hasUsableLlmForSession,
+    ]
   );
 
   return (
