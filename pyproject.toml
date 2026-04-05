@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "backtester"
+version = "0.1.0"
+description = "Financial backtesting CLI from natural-language strategy descriptions"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "yfinance>=0.2.30",
+    "pandas>=2.0.0",
+    "pyarrow>=14.0.0",
+    "numpy>=1.24.0",
+    "ta>=0.11.0",
+    "anthropic>=0.40.0",
+    "openai>=1.50.0",
+    "python-dotenv>=1.0.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "websockets>=12.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+backtester = "backtester.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["backtester*"]

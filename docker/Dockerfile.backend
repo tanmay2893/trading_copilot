@@ -1,0 +1,16 @@
+# API server (FastAPI + uvicorn). Build context: repository root.
+FROM python:3.12-slim-bookworm
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir --upgrade pip
+
+COPY pyproject.toml README.md ./
+COPY backtester ./backtester
+COPY us_stocks.csv india_stocks.csv ./
+
+RUN pip install --no-cache-dir .
+
+EXPOSE 6700
+
+CMD ["uvicorn", "backtester.api.server:app", "--host", "0.0.0.0", "--port", "6700"]

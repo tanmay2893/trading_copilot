@@ -1,0 +1,548 @@
+Symbol,Name
+^GSPC,S&P 500
+^SPX,S&P 500 Index
+^DJI,Dow Jones Industrial Average
+^IXIC,NASDAQ Composite
+^RUT,Russell 2000
+^VIX,CBOE Volatility Index
+^VXN,CBOE NASDAQ Volatility Index
+^RVX,CBOE Russell 2000 Volatility Index
+^NDX,NASDAQ-100
+^OEX,S&P 100
+^MID,S&P 400 MidCap
+^SP400,S&P MidCap 400
+^SP600,S&P SmallCap 600
+^SP1500,S&P Composite 1500
+^NYA,NYSE Composite
+^XAX,NYSE American Composite
+^NYFANG,NYSE FANG+ Index
+^RUA,Russell 3000
+^RUI,Russell 1000
+^RUT,Russell 2000
+^RUMIC,Russell Microcap
+^DJT,Dow Jones Transportation Average
+^DJU,Dow Jones Utility Average
+^DJA,Dow Jones Composite Average
+^DJC,Dow Jones Commodity Index
+^SOX,PHLX Semiconductor Index
+^HGX,PHLX Housing Sector
+^BKX,KBW Bank Index
+^XBD,AMEX Securities Broker Dealer Index
+^DRG,NYSE Arca Pharmaceutical Index
+^BTK,NYSE Arca Biotechnology Index
+^HUI,NYSE Arca Gold BUGS Index
+^XAU,Philadelphia Gold and Silver Index
+^OSX,PHLX Oil Service Sector
+^UTY,Dow Jones Utility Average
+^INSR,NYSE Insurance Index
+^IXCO,NASDAQ Computer Index
+^IXTC,NASDAQ Telecommunications Index
+^IXFN,NASDAQ Financial Index
+^IXID,NASDAQ Industrial Index
+^IXHC,NASDAQ Healthcare Index
+^IXBK,NASDAQ Bank Index
+^IXK,NASDAQ Technology Sector
+^IXTR,NASDAQ Transportation Index
+^IXRE,NASDAQ Real Estate Index
+^IXUT,NASDAQ Utilities Index
+^IXFN,NASDAQ Financials
+^IXCI,NASDAQ Industrials
+^IXCO,NASDAQ Computer
+^IXBT,NASDAQ Biotechnology
+^IXN,NASDAQ Internet
+^IXG,Global Financials Index
+^IXJ,Global Healthcare Index
+^IXP,Global Telecom Index
+^IXY,Global Technology Index
+^IXE,Global Energy Index
+^IXM,Global Materials Index
+^DJUSEN,Dow Jones U.S. Energy
+^DJUSFN,Dow Jones U.S. Financials
+^DJUSHC,Dow Jones U.S. Health Care
+^DJUSTC,Dow Jones U.S. Technology
+^DJUSUT,Dow Jones U.S. Utilities
+^DJUSRE,Dow Jones U.S. Real Estate
+^DJUSCN,Dow Jones U.S. Consumer Goods
+^DJUSNC,Dow Jones U.S. Consumer Services
+^DJUSIN,Dow Jones U.S. Industrials
+^DJUSMT,Dow Jones U.S. Basic Materials
+^W5000,Wilshire 5000 Total Market Index
+^W4500,Wilshire 4500 Completion Index
+^W1000,Wilshire 1000 Large Cap
+^W500,Wilshire 500 Large Cap
+^W2500,Wilshire 2500
+^FTW5000,FT Wilshire 5000 Index
+^FTWLC,FT Wilshire Large Cap
+^FTWMC,FT Wilshire Mid Cap
+^FTWSC,FT Wilshire Small Cap
+A,Agilent Technologies Inc. Common Stock
+AAPL,Apple Inc. Common Stock
+ABBV,AbbVie Inc. Common Stock
+ABNB,Airbnb Inc. Class A Common Stock
+ABT,Abbott Laboratories Common Stock
+ACGL,Arch Capital Group Ltd. Common Stock
+ACM,AECOM Common Stock
+ACN,Accenture plc Class A Ordinary Shares (Ireland)
+ADBE,Adobe Inc. Common Stock
+ADI,Analog Devices Inc. Common Stock
+ADSK,Autodesk Inc. Common Stock
+AEE,Ameren Corporation Common Stock
+AER,AerCap Holdings N.V. Ordinary Shares
+AES,The AES Corporation Common Stock
+AFL,AFLAC Incorporated Common Stock
+AGNCM,AGNC Investment Corp. Depositary Shares rep 6.875% Series D Fixed-to-Floating Cumulative Redeemable Preferred Stock
+AJG,Arthur J. Gallagher & Co. Common Stock
+AKAM,Akamai Technologies Inc. Common Stock
+ALGN,Align Technology Inc. Common Stock
+ALLE,Allegion plc Ordinary Shares
+ALNY,Alnylam Pharmaceuticals Inc. Common Stock
+AMAT,Applied Materials Inc. Common Stock
+AME,AMETEK Inc.
+AMGN,Amgen Inc. Common Stock
+AMH,American Homes 4 Rent Common Shares of Beneficial Interest
+AMP,Ameriprise Financial Inc. Common Stock
+AMT,American Tower Corporation (REIT) Common Stock
+AMZN,Amazon.com Inc. Common Stock
+ANET,Arista Networks Inc. Common Stock
+AON,Aon plc Class A Ordinary Shares (Ireland)
+AOS,A.O. Smith Corporation Common Stock
+APA,APA Corporation Common Stock
+APH,Amphenol Corporation Common Stock
+APOS,Apollo Global Management Inc. 7.625% Fixed-Rate Resettable Junior Subordinated Notes due 2053
+APP,Applovin Corporation Class A Common Stock
+ARCC,Ares Capital Corporation Common Stock
+ARE,Alexandria Real Estate Equities Inc. Common Stock
+ARM,Arm Holdings plc American Depositary Shares
+ATO,Atmos Energy Corporation Common Stock
+AVB,AvalonBay Communities Inc. Common Stock
+AVGO,Broadcom Inc. Common Stock
+AVTR,Avantor Inc. Common Stock
+AVY,Avery Dennison Corporation Common Stock
+AWK,American Water Works Company Inc. Common Stock
+AXP,American Express Company Common Stock
+AZO,AutoZone Inc. Common Stock
+BA,Boeing Company (The) Common Stock
+BABA,Alibaba Group Holding Limited American Depositary Shares each representing eight Ordinary share
+BAC,Bank of America Corporation Common Stock
+BAH,Booz Allen Hamilton Holding Corporation Common Stock
+BALL,Ball Corporation Common Stock
+BAM,Brookfield Asset Management Inc Class A Limited Voting Shares
+BAP,Credicorp Ltd. Common Stock
+BAX,Baxter International Inc. Common Stock
+BBY,Best Buy Co. Inc. Common Stock
+BCE,BCE Inc. Common Stock
+BEN,Franklin Resources Inc. Common Stock
+BG,Bunge Limited Common Shares
+BHP,BHP Group Limited American Depositary Shares (Each representing two Ordinary Shares)
+BIDU,Baidu Inc. ADS
+BIIB,Biogen Inc. Common Stock
+BIP,Brookfield Infrastructure Partners LP Limited Partnership Units
+BIRK,Birkenstock Holding plc Ordinary Shares
+BKNG,Booking Holdings Inc. Common Stock
+BKR,Baker Hughes Company Class A Common Stock
+BLK,BlackRock Inc. Common Stock
+BMRN,BioMarin Pharmaceutical Inc. Common Stock
+BN,Brookfield Corporation Class A Limited Voting Shares
+BNH,Brookfield Finance Inc. 4.625% Subordinated Notes due October 16 2080
+BNJ,Brookfield Finance Inc. 4.50% Perpetual Subordinated Notes
+BNS,Bank Nova Scotia Halifax Pfd 3 Ordinary Shares
+BPYPM,Brookfield Property Partners L.P. 6.25% Class A Cumulative Redeemable Preferred Units Series 1
+BPYPN,Brookfield Property Partners L.P. 5.750% Class A Cumulative Redeemable Perpetual Preferred Units Series 3
+BPYPO,Brookfield Property Partners L.P. 6.375% Class A Cumulative Redeemable Perpetual Preferred Units Series 2
+BPYPP,Brookfield Property Partners L.P. 6.50% Class A Cumulative Redeemable Perpetual Preferred Units
+BR,Broadridge Financial Solutions Inc. Common Stock
+CI,The Cigna Group Common Stock
+COIN,Coinbase Global Inc. Class A Common Stock
+COO,The Cooper Companies Inc. Common Stock
+CPT,Camden Property Trust Common Stock
+CRM,Salesforce Inc. Common Stock
+D,Dominion Energy Inc. Common Stock
+DAL,Delta Air Lines Inc. Common Stock
+DASH,DoorDash Inc. Class A Common Stock
+DD,DuPont de Nemours Inc. Common Stock
+DDOG,Datadog Inc. Class A Common Stock
+DE,Deere & Company Common Stock
+DECK,Deckers Outdoor Corporation Common Stock
+DG,Dollar General Corporation Common Stock
+DHI,D.R. Horton Inc. Common Stock
+DHR,Danaher Corporation Common Stock
+DIS,Walt Disney Company (The) Common Stock
+DKNG,DraftKings Inc. Class A Common Stock
+DLR,Digital Realty Trust Inc. Common Stock
+DLTR,Dollar Tree Inc. Common Stock
+DOC,Healthpeak Properties Inc. Common Stock
+DOCU,DocuSign Inc. Common Stock
+DOV,Dover Corporation Common Stock
+DRI,Darden Restaurants Inc. Common Stock
+DTE,DTE Energy Company Common Stock
+DUK,Duke Energy Corporation (Holding Company) Common Stock
+DUKB,Duke Energy Corporation 5.625% Junior Subordinated Debentures due 2078
+DVN,Devon Energy Corporation Common Stock
+EA,Electronic Arts Inc. Common Stock
+EC,Ecopetrol S.A. American Depositary Shares
+ECL,Ecolab Inc. Common Stock
+EDU,New Oriental Education & Technology Group Inc. Sponsored ADR representing 10 Ordinary Share (Cayman Islands)
+EFX,Equifax Inc. Common Stock
+EG,Everest Group Ltd. Common Stock
+EIX,Edison International Common Stock
+EL,Estee Lauder Companies Inc. (The) Common Stock
+ELV,Elevance Health Inc. Common Stock
+EMN,Eastman Chemical Company Common Stock
+EMR,Emerson Electric Company Common Stock
+ENB,Enbridge Inc Common Stock
+EOG,EOG Resources Inc. Common Stock
+EQIX,Equinix Inc. Common Stock REIT
+EQR,Equity Residential Common Shares of Beneficial Interest
+EQT,EQT Corporation Common Stock
+ESS,Essex Property Trust Inc. Common Stock
+ETN,Eaton Corporation PLC Ordinary Shares
+EW,Edwards Lifesciences Corporation Common Stock
+EWBC,East West Bancorp Inc. Common Stock
+EXAS,Exact Sciences Corporation Common Stock
+EXC,Exelon Corporation Common Stock
+EXPD,Expeditors International of Washington Inc. Common Stock
+EXPE,Expedia Group Inc. Common Stock
+EXR,Extra Space Storage Inc Common Stock
+F,Ford Motor Company Common Stock
+FANG,Diamondback Energy Inc. Common Stock
+FAST,Fastenal Company Common Stock
+FDS,FactSet Research Systems Inc. Common Stock
+FDX,FedEx Corporation Common Stock
+FE,FirstEnergy Corp. Common Stock
+FFIV,F5 Inc. Common Stock
+FIS,Fidelity National Information Services Inc. Common Stock
+FITB,Fifth Third Bancorp Common Stock
+FITBI,Fifth Third Bancorp Depositary Shares
+FLEX,Flex Ltd. Ordinary Shares
+FNF,FNF Group of Fidelity National Financial Inc. Common Stock
+FNV,Franco-Nevada Corporation
+FSLR,First Solar Inc. Common Stock
+FTI,TechnipFMC plc Ordinary Share
+FTNT,Fortinet Inc. Common Stock
+GD,General Dynamics Corporation Common Stock
+GDDY,GoDaddy Inc. Class A Common Stock
+GEN,Gen Digital Inc. Common Stock
+GEV,GE Vernova Inc. Common Stock
+GGG,Graco Inc. Common Stock
+GILD,Gilead Sciences Inc. Common Stock
+GIS,General Mills Inc. Common Stock
+GLPI,Gaming and Leisure Properties Inc. Common Stock
+GM,General Motors Company Common Stock
+GOOG,Alphabet Inc. Class C Capital Stock
+GOOGL,Alphabet Inc. Class A Common Stock
+GPC,Genuine Parts Company Common Stock
+GPN,Global Payments Inc. Common Stock
+GRAB,Grab Holdings Limited Class A Ordinary Shares
+GRMN,Garmin Ltd. Common Stock (Switzerland)
+GS,Goldman Sachs Group Inc. (The) Common Stock
+H,Hyatt Hotels Corporation Class A Common Stock
+HAL,Halliburton Company Common Stock
+HCA,HCA Healthcare Inc. Common Stock
+HD,Home Depot Inc. (The) Common Stock
+HEI,Heico Corporation Common Stock
+HIG,Hartford Financial Services Group Inc. (The) Common Stock
+HII,Huntington Ingalls Industries Inc. Common Stock
+HMC,Honda Motor Company Ltd. Common Stock
+HOLX,Hologic Inc. Common Stock
+HON,Honeywell International Inc. Common Stock
+HOOD,Robinhood Markets Inc. Class A Common Stock
+HPE,Hewlett Packard Enterprise Company Common Stock
+HPQ,HP Inc. Common Stock
+HRL,Hormel Foods Corporation Common Stock
+HST,Host Hotels & Resorts Inc. Common Stock
+HUM,Humana Inc. Common Stock
+IBN,ICICI Bank Limited Common Stock
+ICE,Intercontinental Exchange Inc. Common Stock
+IDXX,IDEXX Laboratories Inc. Common Stock
+IEX,IDEX Corporation Common Stock
+IFF,International Flavors & Fragrances Inc. Common Stock
+ILMN,Illumina Inc. Common Stock
+IMO,Imperial Oil Limited Common Stock
+INCY,Incyte Corp. Common Stock
+INFY,Infosys Limited American Depositary Shares
+INSM,Insmed Incorporated Common Stock
+INTC,Intel Corporation Common Stock
+INTU,Intuit Inc. Common Stock
+IP,International Paper Company Common Stock
+IQV,IQVIA Holdings Inc. Common Stock
+IRM,Iron Mountain Incorporated (Delaware)Common Stock REIT
+ISRG,Intuitive Surgical Inc. Common Stock
+IT,Gartner Inc. Common Stock
+ITUB,Itau Unibanco Banco Holding SA American Depositary Shares (Each repstg 500 Preferred shares)
+JBHT,J.B. Hunt Transport Services Inc. Common Stock
+JCI,Johnson Controls International plc Ordinary Share
+JD,JD.com Inc. American Depositary Shares
+JEF,Jefferies Financial Group Inc. Common Stock
+JKHY,Jack Henry & Associates Inc. Common Stock
+JLL,Jones Lang LaSalle Incorporated Common Stock
+K,Kellanova Common Stock
+KEY,KeyCorp Common Stock
+KEYS,Keysight Technologies Inc. Common Stock
+KGC,Kinross Gold Corporation Common Stock
+KHC,The Kraft Heinz Company Common Stock
+KIM,Kimco Realty Corporation (HC) Common Stock
+KLAC,KLA Corporation Common Stock
+KMI,Kinder Morgan Inc. Common Stock
+L,Loews Corporation Common Stock
+LAMR,Lamar Advertising Company Class A Common Stock
+LECO,Lincoln Electric Holdings Inc. Common Shares
+LEN,Lennar Corporation Class A Common Stock
+LH,Labcorp Holdings Inc. Common Stock
+LHX,L3Harris Technologies Inc. Common Stock
+LI,Li Auto Inc. American Depositary Shares
+LII,Lennox International Inc. Common Stock
+LIN,Linde plc Ordinary Shares
+LKQ,LKQ Corporation Common Stock
+LLY,Eli Lilly and Company Common Stock
+LMT,Lockheed Martin Corporation Common Stock
+LPLA,LPL Financial Holdings Inc. Common Stock
+LRCX,Lam Research Corporation Common Stock
+LUV,Southwest Airlines Company Common Stock
+LVS,Las Vegas Sands Corp. Common Stock
+LYB,LyondellBasell Industries NV Ordinary Shares Class A (Netherlands)
+LYV,Live Nation Entertainment Inc. Common Stock
+MA,Mastercard Incorporated Common Stock
+MAA,Mid-America Apartment Communities Inc. Common Stock
+MAR,Marriott International Class A Common Stock
+MAS,Masco Corporation Common Stock
+MCHP,Microchip Technology Incorporated Common Stock
+MCK,McKesson Corporation Common Stock
+MDB,MongoDB Inc. Class A Common Stock
+MDT,Medtronic plc. Ordinary Shares
+MELI,MercadoLibre Inc. Common Stock
+MET,MetLife Inc. Common Stock
+META,Meta Platforms Inc. Class A Common Stock
+MFC,Manulife Financial Corporation Common Stock
+MFG,Mizuho Financial Group Inc. Sponosred ADR (Japan)
+MGA,Magna International Inc. Common Stock
+MGM,MGM Resorts International Common Stock
+MKC,McCormick & Company Incorporated Common Stock
+MKL,Markel Group Inc. Common Stock
+MLM,Martin Marietta Materials Inc. Common Stock
+MMC,Marsh & McLennan Companies Inc. Common Stock
+MMYT,MakeMyTrip Limited Ordinary Shares
+MNST,Monster Beverage Corporation
+MPC,Marathon Petroleum Corporation Common Stock
+MRK,Merck & Company Inc. Common Stock (new)
+MRNA,Moderna Inc. Common Stock
+MRVL,Marvell Technology Inc. Common Stock
+MS,Morgan Stanley Common Stock
+MSCI,MSCI Inc. Common Stock
+MSFT,Microsoft Corporation Common Stock
+MSI,Motorola Solutions Inc. Common Stock
+MSTR,MicroStrategy Incorporated Common Stock Class A
+MTB,M&T Bank Corporation Common Stock
+MTD,Mettler-Toledo International Inc. Common Stock
+MU,Micron Technology Inc. Common Stock
+NDAQ,Nasdaq Inc. Common Stock
+NDSN,Nordson Corporation Common Stock
+NEE,NextEra Energy Inc. Common Stock
+NEM,Newmont Corporation
+NFLX,Netflix Inc. Common Stock
+NI,NiSource Inc Common Stock
+NKE,Nike Inc. Common Stock
+NOC,Northrop Grumman Corporation Common Stock
+NOW,ServiceNow Inc. Common Stock
+NRG,NRG Energy Inc. Common Stock
+NTAP,NetApp Inc. Common Stock
+NTRS,Northern Trust Corporation Common Stock
+NU,Nu Holdings Ltd. Class A Ordinary Shares
+NUE,Nucor Corporation Common Stock
+NVDA,NVIDIA Corporation Common Stock
+NVS,Novartis AG Common Stock
+NWS,News Corporation Class B Common Stock
+NWSA,News Corporation Class A Common Stock
+NXPI,NXP Semiconductors N.V. Common Stock
+O,Realty Income Corporation Common Stock
+OC,Owens Corning Inc Common Stock New
+ODFL,Old Dominion Freight Line Inc. Common Stock
+OKE,ONEOK Inc. Common Stock
+OKTA,Okta Inc. Class A Common Stock
+OMC,Omnicom Group Inc. Common Stock
+ON,ON Semiconductor Corporation Common Stock
+ONON,On Holding AG Class A Ordinary Shares
+ONTO,Onto Innovation Inc. Common Stock
+ORCL,Oracle Corporation Common Stock
+OVV,Ovintiv Inc. (DE)
+OXY,Occidental Petroleum Corporation Common Stock
+PANW,Palo Alto Networks Inc. Common Stock
+PAYX,Paychex Inc. Common Stock
+PBR,Petroleo Brasileiro S.A.- Petrobras Common Stock
+PCAR,PACCAR Inc. Common Stock
+PEG,Public Service Enterprise Group Incorporated Common Stock
+PEP,PepsiCo Inc. Common Stock
+PFE,Pfizer Inc. Common Stock
+PFG,Principal Financial Group Inc Common Stock
+PH,Parker-Hannifin Corporation Common Stock
+PHM,PulteGroup Inc. Common Stock
+PINS,Pinterest Inc. Class A Common Stock
+PKG,Packaging Corporation of America Common Stock
+PLD,Prologis Inc. Common Stock
+PLTR,Palantir Technologies Inc. Class A Common Stock
+PM,Philip Morris International Inc Common Stock
+PNC,PNC Financial Services Group Inc. (The) Common Stock
+PNR,Pentair plc. Ordinary Share
+POOL,Pool Corporation Common Stock
+PPG,PPG Industries Inc. Common Stock
+PPL,PPL Corporation Common Stock
+PRU,Prudential Financial Inc. Common Stock
+PSA,Public Storage Common Stock
+PSX,Phillips 66 Common Stock
+PTC,PTC Inc. Common Stock
+PWR,Quanta Services Inc. Common Stock
+PYPL,PayPal Holdings Inc. Common Stock
+QCOM,QUALCOMM Incorporated Common Stock
+QRVO,Qorvo Inc. Common Stock
+QSR,Restaurant Brands International Inc. Common Shares
+RACE,Ferrari N.V. Common Shares
+RBLX,Roblox Corporation Class A Common Stock
+REG,Regency Centers Corporation Common Stock
+REGN,Regeneron Pharmaceuticals Inc. Common Stock
+REXR,Rexford Industrial Realty Inc. Common Stock
+RF,Regions Financial Corporation Common Stock
+RGA,Reinsurance Group of America Incorporated Common Stock
+RJF,Raymond James Financial Inc. Common Stock
+RKT,Rocket Companies Inc. Class A Common Stock
+RL,Ralph Lauren Corporation Common Stock
+RNR,RenaissanceRe Holdings Ltd. Common Stock
+ROK,Rockwell Automation Inc. Common Stock
+ROP,Roper Technologies Inc. Common Stock
+ROST,Ross Stores Inc. Common Stock
+RPM,RPM International Inc. Common Stock
+RRX,Regal Rexnord Corporation Common Stock
+RS,Reliance Inc. Common Stock
+RSG,Republic Services Inc. Common Stock
+RVTY,Revvity Inc. Common Stock
+SBAC,SBA Communications Corporation Class A Common Stock
+SBUX,Starbucks Corporation Common Stock
+SE,Sea Limited American Depositary Shares each representing one Class A Ordinary Share
+SHOP,Shopify Inc. Class A Subordinate Voting Shares
+SHW,Sherwin-Williams Company (The) Common Stock
+SJM,The J.M. Smucker Company Common Stock
+SLB,Schlumberger N.V. Common Stock
+SLF,Sun Life Financial Inc. Common Stock
+SLMBP,SLM Corporation Floating Rate Non-Cumulative Preferred Stock Series B
+SMCI,Super Micro Computer Inc. Common Stock
+SMFG,Sumitomo Mitsui Financial Group Inc Unsponsored American Depositary Shares (Japan)
+SNA,Snap-On Incorporated Common Stock
+SNAP,Snap Inc. Class A Common Stock
+SNN,Smith & Nephew SNATS Inc. Common Stock
+SNOW,Snowflake Inc. Class A Common Stock
+SNY,Sanofi ADS
+SO,Southern Company (The) Common Stock
+SOJC,Southern Company (The) Series 2017B 5.25% Junior Subordinated Notes due December 1 2077
+SOJD,Southern Company (The) Series 2020A 4.95% Junior Subordinated Notes due January 30 2080
+SOJE,Southern Company (The) Series 2020C 4.20% Junior Subordinated Notes due October 15 2060
+SPG,Simon Property Group Inc. Common Stock
+SPGI,S&P Global Inc. Common Stock
+SPOT,Spotify Technology S.A. Ordinary Shares
+SQM,Sociedad Quimica y Minera S.A. Common Stock
+SRAD,Sportradar Group AG Class A Ordinary Shares
+SREA,DBA Sempra 5.750% Junior Subordinated Notes due 2079
+SSNC,SS&C Technologies Holdings Inc. Common Stock
+STLA,Stellantis N.V. Common Shares
+STLD,Steel Dynamics Inc.
+STT,State Street Corporation Common Stock
+STX,Seagate Technology Holdings PLC Ordinary Shares (Ireland)
+SU,Suncor Energy  Inc. Common Stock
+SUI,Sun Communities Inc. Common Stock
+SWK,Stanley Black & Decker Inc. Common Stock
+SWKS,Skyworks Solutions Inc. Common Stock
+SYK,Stryker Corporation Common Stock
+SYY,Sysco Corporation Common Stock
+TAP,Molson Coors Beverage Company Class B Common Stock
+TCOM,Trip.com Group Limited American Depositary Shares
+TD,Toronto Dominion Bank (The) Common Stock
+TDG,Transdigm Group Incorporated Common Stock
+TDY,Teledyne Technologies Incorporated Common Stock
+TECK,Teck Resources Ltd Ordinary Shares
+TEL,TE Connectivity Ltd. New Switzerland Registered Shares
+TER,Teradyne Inc. Common Stock
+TEVA,Teva Pharmaceutical Industries Limited American Depositary Shares
+TFC,Truist Financial Corporation Common Stock
+TFX,Teleflex Incorporated Common Stock
+TGT,Target Corporation Common Stock
+THC,Tenet Healthcare Corporation Common Stock
+TM,Toyota Motor Corporation Common Stock
+TME,Tencent Music Entertainment Group American Depositary Shares each representing two Class A Ordinary Shares
+TMUS,T-Mobile US Inc. Common Stock
+TOL,Toll Brothers Inc. Common Stock
+TRGP,Targa Resources Inc. Common Stock
+TROW,T. Rowe Price Group Inc. Common Stock
+TRP,TC Energy Corporation Common Stock
+TRU,TransUnion Common Stock
+TRV,The Travelers Companies Inc. Common Stock
+TS,Tenaris S.A. American Depositary Shares
+TSCO,Tractor Supply Company Common Stock
+TSLA,Tesla Inc. Common Stock
+TSN,Tyson Foods Inc. Common Stock
+TTD,The Trade Desk Inc. Class A Common Stock
+TTWO,Take-Two Interactive Software Inc. Common Stock
+TU,Telus Corporation Ordinary Shares
+TXT,Textron Inc. Common Stock
+UAL,United Airlines Holdings Inc. Common Stock
+UBER,Uber Technologies Inc. Common Stock
+UDR,UDR Inc. Common Stock
+UHS,Universal Health Services Inc. Common Stock
+UI,Ubiquiti Inc. Common Stock
+ULTA,Ulta Beauty Inc. Common Stock
+UMC,United Microelectronics Corporation (NEW) Common Stock
+UNH,UnitedHealth Group Incorporated Common Stock (DE)
+UNM,Unum Group Common Stock
+UNP,Union Pacific Corporation Common Stock
+URI,United Rentals Inc. Common Stock
+V,Visa Inc.
+VALE,VALE S.A.  American Depositary Shares Each Representing one common share
+VEEV,Veeva Systems Inc. Class A Common Stock
+VLO,Valero Energy Corporation Common Stock
+VMC,Vulcan Materials Company (Holding Company) Common Stock
+VRSK,Verisk Analytics Inc. Common Stock
+VRSN,VeriSign Inc. Common Stock
+VRTX,Vertex Pharmaceuticals Incorporated Common Stock
+VTR,Ventas Inc. Common Stock
+VZ,Verizon Communications Inc. Common Stock
+WAT,Waters Corporation Common Stock
+WDC,Western Digital Corporation Common Stock
+WELL,Welltower Inc. Common Stock
+WFC,Wells Fargo & Company Common Stock
+WM,Waste Management Inc. Common Stock
+WMB,Williams Companies Inc. (The) Common Stock
+WMG,Warner Music Group Corp. Class A Common Stock
+WMT,Walmart Inc. Common Stock
+WPM,Wheaton Precious Metals Corp Common Shares (Canada)
+WRB,W.R. Berkley Corporation Common Stock
+WSM,Williams-Sonoma Inc. Common Stock (DE)
+WST,West Pharmaceutical Services Inc. Common Stock
+WTRG,Essential Utilities Inc. Common Stock
+WTW,Willis Towers Watson Public Limited Company Ordinary Shares
+WY,Weyerhaeuser Company Common Stock
+XEL,Xcel Energy Inc. Common Stock
+XP,XP Inc. Class A Common Stock
+XPO,XPO Inc. Common Stock
+XYL,Xylem Inc. Common Stock New
+YUM,Yum! Brands Inc.
+Z,Zillow Group Inc. Class C Capital Stock
+ZBH,Zimmer Biomet Holdings Inc. Common Stock
+ZBRA,Zebra Technologies Corporation Class A Common Stock
+ZG,Zillow Group Inc. Class A Common Stock
+ZM,Zoom Video Communications Inc. Class A Common Stock
+ZS,Zscaler Inc. Common Stock
+ZTO,ZTO Express (Cayman) Inc. American Depositary Shares each representing one Class A ordinary share.
+ZTS,Zoetis Inc. Class A Common Stock
+^GSPC,S&P500
+BTC-USD,BITCOIN_CRYPTO
+ETH-USD,ETHERIUM_CRYPTO
+GC=F,GOLD_COMM
+^DJI,Dow Jones
+^IXIC,NASDAQ Composite
+^NDX,NASDAQ 100
+^RUT,Russell 2000
+^W5000,Wilshire 5000
+^OEX,S&P100
+^FTSE,FTSE 100
+^FTMC,FTSE 250
+^GDAXI,DAX
+^IBEX,IBEX 35
+^SSMI,SMI
+^N225,Nikkei 225
+^HSI,Hang Seng Index

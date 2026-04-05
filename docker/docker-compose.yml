@@ -1,0 +1,38 @@
+# Run from repo root: docker compose -f docker/docker-compose.yml up --build
+# Or from this folder: docker compose up --build
+
+name: backtester
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    ports:
+      - "6700:6700"
+    environment:
+      # Optional: set keys here or use env_file below
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+    env_file:
+      - path: ../.env
+        required: false
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:6700/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6700/api}
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
