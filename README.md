@@ -2,12 +2,22 @@
 
 **Natural-language → executable backtests.** Describe a trading idea in plain English; an LLM generates a small `Strategy` class, runs it on historical OHLCV (via [yfinance](https://github.com/ranaroussi/yfinance)), and iterates until you get coherent buy/sell signals. A **Next.js** UI and **FastAPI** backend provide a chat-style copilot; the same engine powers the **CLI**.
 
+### Sample strategies
+
+Use these as inspiration in chat or with the CLI (`--strategy "..."`). The model implements the logic and runs it on your ticker and date range.
+
+- **Indicators:** Buy when RSI falls below 30 and MACD crosses above its signal line; sell when RSI rises above 70.
+- **Earnings (corporate calendar via Yahoo Finance):** Buy on the first trading day after an earnings announcement if EPS surprise is positive; sell 10 trading days later or when RSI exceeds 70.
+- **Dividends:** Buy three trading days before an ex-dividend date and sell on the ex-dividend date, only when the dividend amount is greater than zero and the 20-day SMA is above the 50-day SMA.
+
+**More sample strategies:** see **[STRATEGIES.md](STRATEGIES.md)** for 110+ additional natural-language ideas (technical, corporate events, hybrids, and more).
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 The Python package is **`backtester`** (`pip install -e .`, see `pyproject.toml`).
 
-[Workflow](#workflow-like-claude-code-for-trading-strategies) · [Docker (preferred)](#run-with-docker-preferred) · [Run manually](#run-manually-backend--frontend) · [Web app](#web-app) · [CLI](#cli-quick-start) · [Corporate examples](#corporate-strategy-examples) · [How it works](#how-it-works) · [LLM keys](#llm-providers)
+[Sample strategies](#sample-strategies) · [Workflow](#workflow-like-claude-code-for-trading-strategies) · [Docker (preferred)](#run-with-docker-preferred) · [Run manually](#run-manually-backend--frontend) · [Web app](#web-app) · [CLI](#cli-quick-start) · [Corporate examples](#corporate-strategy-examples) · [How it works](#how-it-works) · [LLM keys](#llm-providers)
 
 <p align="center">
   <img src="recordings/chart-msft-demo.png" alt="Sample price chart with backtest signals" width="720" />
