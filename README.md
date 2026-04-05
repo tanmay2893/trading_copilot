@@ -17,7 +17,7 @@ Use these as inspiration in chat or with the CLI (`--strategy "..."`). The model
 
 The Python package is **`backtester`** (`pip install -e .`, see `pyproject.toml`).
 
-[Sample strategies](#sample-strategies) · [Workflow](#workflow-like-claude-code-for-trading-strategies) · [Docker (preferred)](#run-with-docker-preferred) · [Run manually](#run-manually-backend--frontend) · [Web app](#web-app) · [CLI](#cli-quick-start) · [Corporate examples](#corporate-strategy-examples) · [How it works](#how-it-works) · [LLM keys](#llm-providers)
+[Sample strategies](#sample-strategies) · [Workflow](#workflow-like-claude-code-for-trading-strategies) · [Docker (preferred)](#run-with-docker-preferred) · [Run manually](#run-manually-backend--frontend) · [Web app](#web-app) · [CLI](#cli-quick-start) · [Corporate examples](#corporate-strategy-examples) · [How it works](#how-it-works) · [LLM keys](#llm-providers) · [Future improvements](#future-improvements)
 
 <p align="center">
   <img src="recordings/chart-msft-demo.png" alt="Sample price chart with backtest signals" width="720" />
@@ -338,6 +338,26 @@ Optional: `DEFAULT_MODEL`, `MAX_ITERATIONS` in `backtester/.env` ([backtester/.e
 | [STRATEGIES.md](STRATEGIES.md) | 110+ example natural-language strategies |
 | [docker/README.md](docker/README.md) | Compose details, volumes, troubleshooting |
 | [frontend/README.md](frontend/README.md) | Dev proxy / ngrok notes |
+
+---
+
+## Future improvements
+
+Areas where the project can grow; contributions and design discussion are welcome.
+
+- **Hallucinations and grounding** — Language models can misunderstand your strategy, invent columns or APIs that do not exist, or emit code that passes checks but does not match your intent. Tighter validation against the real dataframe schema, stronger harness tests, and the existing **human-in-the-loop** flow (inspect the chart, read generated code, refine in chat) remain essential—not optional—defenses.
+
+- **Backtest realism** — Default runs are research-oriented: fees, slippage, spread, partial fills, and short borrow costs are not fully modeled; bar-level timing (open vs close vs intraday) may differ from how you would execute live.
+
+- **Data quality and coverage** — [yfinance](https://github.com/ranaroussi/yfinance) / Yahoo Finance data can be incomplete, restated, or misaligned with a broker’s feed; corporate calendars can have gaps. Broader symbol universes and batch reports add survivorship and selection effects to interpret carefully.
+
+- **Expressiveness** — Richer natural-language coverage for multi-asset, options, fundamentals, alternative data, and non-US venues would require new data pipelines and guardrails in codegen.
+
+- **Models and operating cost** — Additional LLM providers, optional local or open-weight models, and cheaper iteration paths would improve choice and reduce vendor lock-in.
+
+- **Automated quality** — More integration tests around codegen, indicators, corporate merges, and API surfaces; reproducible runs across Python/OS versions in CI.
+
+- **Security and deployment** — First-class guidance for API keys and secrets in self-hosted and team setups, plus hardening for production-style deployments.
 
 ---
 
