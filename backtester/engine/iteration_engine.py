@@ -392,6 +392,9 @@ def run_fix_loop(
             "indicators. Use this visual context to understand which events "
             "or dates the user believes are wrong (too many, too few, or "
             "mis-timed signals) and adjust the logic accordingly.\n"
+            "If the issue is only that an SMA/EMA line does not match the **price** scale, check whether "
+            "that series is a **volume** (or other non-price) moving average — if so, different scale is "
+            "correct; do not \"fix\" by converting it to price SMA unless the user explicitly asked.\n"
         )
 
     selected_note = ""

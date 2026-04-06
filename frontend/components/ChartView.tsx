@@ -34,15 +34,29 @@ const INDICATOR_COLORS = [
   "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#14b8a6",
 ];
 
-const OVERLAY_KEYWORDS = [
-  "sma", "ema", "wma", "vwap", "bollinger", "bb_upper", "bb_lower",
+/** Name patterns that are always drawn on the price scale (not volume / flow series). */
+const PRICE_OVERLAY_NAME_HINTS = [
+  "vwap", "bollinger", "bb_upper", "bb_lower",
   "bb_mid", "keltner", "ichimoku", "senkou", "tenkan", "kijun",
   "upper_band", "lower_band", "middle_band", "moving_avg",
 ];
 
+function isVolumeOrFlowSeriesName(name: string): boolean {
+  const lower = name.toLowerCase();
+  if (lower.includes("vwap")) return false;
+  if (/_volume|volume_|^vol_|_vol$/.test(lower)) return true;
+  if (/\b(obv|cmf|mfi|ad_line|chaikin)\b/.test(lower)) return true;
+  return false;
+}
+
+/**
+ * SMA/EMA/WMA are ambiguous (price vs volume). Never treat them as overlays by keyword alone —
+ * only when values overlap the price range, or the name is an unambiguous price overlay (BB, VWAP, …).
+ */
 function isOverlayIndicator(name: string, values: { value: number }[], priceMin: number, priceMax: number): boolean {
   const lower = name.toLowerCase();
-  if (OVERLAY_KEYWORDS.some((kw) => lower.includes(kw))) return true;
+  if (isVolumeOrFlowSeriesName(name)) return false;
+  if (PRICE_OVERLAY_NAME_HINTS.some((kw) => lower.includes(kw))) return true;
 
   if (values.length === 0) return false;
   const vals = values.map((v) => v.value).filter((v) => v != null);
@@ -51,7 +65,9 @@ function isOverlayIndicator(name: string, values: { value: number }[], priceMin:
   const max = Math.max(...vals);
   const priceRange = priceMax - priceMin;
   if (priceRange === 0) return true;
-  return min > priceMin - priceRange && max < priceMax + priceRange;
+  const overlapsPriceBand =
+    min <= priceMax + priceRange && max >= priceMin - priceRange;
+  return overlapsPriceBand;
 }
 
 function toNumericSeries(series: { time: string; value: unknown }[]): { time: string; value: number }[] {

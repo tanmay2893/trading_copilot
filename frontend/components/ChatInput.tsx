@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { fetchTickers, type LlmModelOption, type Ticker } from "@/lib/api";
 import { ParameterModal } from "./ParameterModal";
 import { ComplianceModal } from "./ComplianceModal";
+import { StrategyFollowUpSuggestions } from "./StrategyFollowUpSuggestions";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -48,6 +49,10 @@ interface ChatInputProps {
   /** Selected API model id, or "" for auto. */
   llmModelId?: string;
   onLlmModelChange?: (modelId: string) => void;
+  /** LLM “Suggested next steps” chips (same column as quick actions to avoid overlap). */
+  followUpSuggestions?: { label: string; prompt: string }[];
+  onFollowUpPick?: (prompt: string) => void;
+  followUpsDisabled?: boolean;
 }
 
 export function ChatInput({
@@ -69,6 +74,9 @@ export function ChatInput({
   llmModelOptions = [],
   llmModelId = "",
   onLlmModelChange,
+  followUpSuggestions = [],
+  onFollowUpPick,
+  followUpsDisabled = false,
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -209,6 +217,14 @@ export function ChatInput({
   return (
     <div className="flex-shrink-0 border-t border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-3">
       <div className="max-w-3xl mx-auto">
+        {followUpSuggestions.length > 0 && onFollowUpPick && (
+          <StrategyFollowUpSuggestions
+            variant="inline"
+            items={followUpSuggestions}
+            onPick={onFollowUpPick}
+            disabled={followUpsDisabled}
+          />
+        )}
         {/* Quick actions row */}
         {hasSuccessfulRun && !isLoading && (
           <div className="flex items-center gap-2 mb-2 relative" ref={pickerRef}>

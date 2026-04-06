@@ -7,6 +7,7 @@ prompt construction and automatic fix retries.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Callable
 
 import pandas as pd
 
@@ -26,6 +27,19 @@ from backtester.prompts.templates import (
     build_change_summary_prompt,
     build_refine_fix_prompt,
     build_refine_prompt,
+)
+from backtester.progress_narrative import (
+    CODE_FROM_RULES,
+    FIX_EXECUTION,
+    QUALITY_REVIEW,
+    SIMULATE_TRADES,
+    VALIDATE_SIGNALS,
+    detail_attempt,
+    detail_code_lines,
+    detail_fix_error,
+    detail_review_outcome,
+    detail_signals,
+    detail_validation_success,
 )
 from backtester.ui import print_iteration_status, step
 
@@ -54,11 +68,18 @@ def run_refine_turn(
     verbose: bool = False,
     chart_image: str | None = None,
     is_selected_version: bool = False,
+    on_progress: Callable[[str, str, str], None] | None = None,
 ) -> RefineResult:
     """Execute a single refinement turn: modify code, execute, validate, auto-fix.
 
     *chart_image*: optional base64-encoded PNG for visual LLM context.
+    *on_progress*: optional (step_name, status, detail) callback for WebSocket progress (same shape as iteration loop).
     """
+
+    def _prog(step_name: str, status: str, detail: str = "") -> None:
+        if on_progress:
+            on_progress(step_name, status, detail)
+
     from backtester.data.corporate import has_corporate_columns
 
     result = RefineResult()
@@ -84,6 +105,7 @@ def run_refine_turn(
         result.attempts = attempt
 
         if attempt == 1:
+            _prog(CODE_FROM_RULES, "running", detail_attempt(attempt, max_attempts))
             with step("Refining strategy", f"[attempt {attempt}/{max_attempts}]"):
                 prompt = build_refine_prompt(
                     current_code=current_code,
@@ -107,17 +129,23 @@ def run_refine_turn(
                         "markers appear relative to price and any indicators; (2) identify the "
                         "events or dates you believe are important based on the user's request; "
                         "and (3) ensure the refined implementation matches the user's intent.\n"
+                        "If the user complains that a line named like SMA/EMA does not align with **price**, "
+                        "check the code: if that series is computed from **Volume** (or another non-price column), "
+                        "different vertical scale is correct — do **not** rescale or replace it with price SMA; "
+                        "output unchanged code unless they asked for a real logic change.\n"
                     )
                 llm_resp = provider.generate(prompt, REFINE_SYSTEM_PROMPT, images=images)
                 result.total_input_tokens += llm_resp.input_tokens
                 result.total_output_tokens += llm_resp.output_tokens
                 current_code = extract_code(llm_resp.content)
+            _prog(CODE_FROM_RULES, "success", detail_code_lines(len(current_code.splitlines())))
         else:
             print_iteration_status(
                 attempt, max_attempts,
                 last_error.get("error_type", "UNKNOWN"),
                 last_error.get("message", "")[:100],
             )
+            _prog(FIX_EXECUTION, "running", detail_attempt(attempt, max_attempts))
             with step("Fixing refinement", f"[attempt {attempt}/{max_attempts}]"):
                 prompt = build_refine_fix_prompt(
                     current_code=current_code,
@@ -135,9 +163,11 @@ def run_refine_turn(
                 result.total_input_tokens += llm_resp.input_tokens
                 result.total_output_tokens += llm_resp.output_tokens
                 current_code = extract_code(llm_resp.content)
+            _prog(FIX_EXECUTION, "success", detail_code_lines(len(current_code.splitlines())))
 
         result.code = current_code
 
+        _prog(SIMULATE_TRADES, "running", detail_attempt(attempt, max_attempts))
         with step("Running backtest", f"[attempt {attempt}/{max_attempts}]") as s:
             exec_result = execute_strategy(current_code, df)
             if exec_result.success:
@@ -146,6 +176,11 @@ def run_refine_turn(
                 s.fail(f"{exec_result.error_type}: {exec_result.error_message[:80]}")
 
         if not exec_result.success:
+            _prog(
+                SIMULATE_TRADES,
+                "failed",
+                detail_fix_error(exec_result.error_type, exec_result.error_message),
+            )
             last_error = {
                 "error_type": exec_result.error_type,
                 "message": exec_result.error_message,
@@ -153,6 +188,9 @@ def run_refine_turn(
             }
             continue
 
+        _prog(SIMULATE_TRADES, "success", detail_signals(exec_result.signal_count))
+
+        _prog(VALIDATE_SIGNALS, "running", "")
         with step("Validating output") as s:
             validation = validate_output(
                 exec_result.output_df,
@@ -167,12 +205,15 @@ def run_refine_turn(
                 s.fail(f"{len(validation.issues)} issue(s)")
 
         if not validation.valid:
+            _prog(VALIDATE_SIGNALS, "failed", "; ".join(validation.issues)[:120])
             last_error = {
                 "error_type": "VALIDATION_FAILURE",
                 "message": "; ".join(validation.issues),
                 "traceback": "",
             }
             continue
+
+        _prog(VALIDATE_SIGNALS, "success", detail_validation_success(len(validation.test_results)))
 
         # --- Phase 4: Invariant checks against baseline behaviour (optional) ---
         if baseline_signals_df is not None:
@@ -196,6 +237,7 @@ def run_refine_turn(
         result.indicator_df = exec_result.indicator_df
         result.indicator_columns = exec_result.indicator_columns
 
+        _prog(QUALITY_REVIEW, "running", "")
         with step("Summarizing changes"):
             summary, in_tok, out_tok = _generate_change_summary(
                 provider, code_before, current_code, change_request,
@@ -203,6 +245,7 @@ def run_refine_turn(
             result.summary = summary
             result.total_input_tokens += in_tok
             result.total_output_tokens += out_tok
+        _prog(QUALITY_REVIEW, "success", detail_review_outcome(True, summary))
 
         turn = ConversationTurn(
             request=change_request,

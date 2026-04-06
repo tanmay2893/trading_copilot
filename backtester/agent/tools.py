@@ -446,7 +446,14 @@ async def handle_refine_strategy(
     # increase the number of BUY signals".
     baseline_signals_df = session.active_signals_df.copy() if session.active_signals_df is not None else None
 
-    await on_event(ProgressEvent(step=REFINE_STRATEGY, status="running"))
+    loop = asyncio.get_event_loop()
+
+    def _sync_progress(step_name: str, status: str, detail: str = ""):
+        asyncio.run_coroutine_threadsafe(
+            on_event(ProgressEvent(step=step_name, status=status, detail=detail)),
+            loop,
+        ).result(timeout=120)
+
     result = await _run_sync(
         run_refine_turn,
         session=refine_session,
@@ -458,11 +465,10 @@ async def handle_refine_strategy(
         verbose=False,
         chart_image=chart_image,
         is_selected_version=is_selected_version,
+        on_progress=_sync_progress,
     )
 
     if result.success:
-        await on_event(ProgressEvent(step=REFINE_STRATEGY, status="success", detail=result.summary))
-
         session.active_code = result.code
         session.active_signals_df = result.signals_df
         if result.indicator_df is not None:

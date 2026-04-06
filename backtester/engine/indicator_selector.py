@@ -174,7 +174,16 @@ def _fallback_classification(
         "ADX", "ADX_Pos", "ADX_Neg", "ATR", "OBV",
     }
 
+    def _volume_series_ma(name: str) -> bool:
+        # SMA_20_Volume / EMA_10_Volume — not price overlays
+        return "Volume" in name and (
+            name.startswith("SMA_") or name.startswith("EMA_") or name.startswith("WMA_")
+        )
+
     for col in indicator_columns:
+        if _volume_series_ma(col):
+            oscillator.append(col)
+            continue
         matched = False
         for pattern in OVERLAY_PATTERNS:
             if col == pattern or col.startswith(pattern + "_") or col.startswith(pattern):

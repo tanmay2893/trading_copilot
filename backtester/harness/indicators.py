@@ -35,14 +35,22 @@ def add_bollinger(
     df["BB_Lower"] = ind.bollinger_lband().ffill()
 
 
+def _sma_ema_column_name(prefix: str, period: int, col: str) -> str:
+    """Stable column name; disambiguate non-Close series (e.g. volume MA vs price MA)."""
+    if col == "Close":
+        return f"{prefix}_{period}"
+    safe = "".join(ch if ch.isalnum() else "_" for ch in col).strip("_") or "series"
+    return f"{prefix}_{period}_{safe}"
+
+
 def add_sma(df: pd.DataFrame, period: int, col: str = "Close") -> None:
     ind = SMAIndicator(close=df[col], window=period)
-    df[f"SMA_{period}"] = ind.sma_indicator().ffill()
+    df[_sma_ema_column_name("SMA", period, col)] = ind.sma_indicator().ffill()
 
 
 def add_ema(df: pd.DataFrame, period: int, col: str = "Close") -> None:
     ind = EMAIndicator(close=df[col], window=period)
-    df[f"EMA_{period}"] = ind.ema_indicator().ffill()
+    df[_sma_ema_column_name("EMA", period, col)] = ind.ema_indicator().ffill()
 
 
 def add_atr(df: pd.DataFrame, period: int = 14, suffix: str | None = None) -> None:

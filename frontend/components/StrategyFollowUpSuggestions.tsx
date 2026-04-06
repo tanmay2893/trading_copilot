@@ -5,24 +5,35 @@ interface StrategyFollowUpSuggestionsProps {
   items: { label: string; prompt: string }[];
   onPick: (prompt: string) => void;
   disabled?: boolean;
+  /**
+   * `panel` — full-width strip (standalone). `inline` — inside the composer column, below messages
+   * and above “Run on other stocks” so chips do not overlap or misalign with quick actions.
+   */
+  variant?: "panel" | "inline";
 }
 
 export function StrategyFollowUpSuggestions({
   items,
   onPick,
   disabled = false,
+  variant = "panel",
 }: StrategyFollowUpSuggestionsProps) {
   if (items.length === 0) return null;
 
+  const wrapperClass =
+    variant === "inline"
+      ? "w-full mb-3 pb-3 border-b border-[var(--border)]"
+      : "flex-shrink-0 border-t border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-2.5";
+
   return (
-    <div className="flex-shrink-0 border-t border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-2.5">
+    <div className={wrapperClass}>
       <p className="text-[10px] uppercase tracking-wide text-[var(--text-muted)] mb-2">
         Suggested next steps
       </p>
       <div className="flex flex-wrap gap-2">
-        {items.map(({ label, prompt }) => (
+        {items.map(({ label, prompt }, index) => (
           <button
-            key={`${label}-${prompt.slice(0, 24)}`}
+            key={`followup-${index}-${prompt.length}-${label.slice(0, 32)}`}
             type="button"
             disabled={disabled}
             onClick={() => onPick(prompt)}

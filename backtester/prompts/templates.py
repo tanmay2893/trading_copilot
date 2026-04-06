@@ -29,8 +29,8 @@ The runner will pass user overrides as keyword arguments to __init__, so paramet
 
 AVAILABLE_INDICATORS = """\
 Pre-built - use EXACT signatures (parameter names matter). All add_* functions modify df in place; call add_sma(self.df, 20) do NOT assign return value:
-  add_sma(df, period, col="Close") -> column "SMA_{period}"
-  add_ema(df, period, col="Close") -> column "EMA_{period}"
+  add_sma(df, period, col="Close") -> column "SMA_{period}"; for other series (e.g. col="Volume") -> "SMA_{period}_Volume" (never the same name as price SMA — avoids chart/scale confusion)
+  add_ema(df, period, col="Close") -> column "EMA_{period}"; col!="Close" -> "EMA_{period}_<SeriesName>" (e.g. "EMA_20_Volume")
   add_rsi(df, period=14, col="Close") -> column "RSI"
   add_macd(df, fast=12, slow=26, signal=9) -> columns "MACD", "MACD_Signal", "MACD_Hist"
   add_bollinger(df, period=20, std_dev=2) -> "BB_Upper", "BB_Middle", "BB_Lower"
@@ -424,6 +424,11 @@ First 3 rows:
 {AVAILABLE_INDICATORS}
 {CUSTOM_LOGIC_GUIDANCE}
 {corporate_section}
+## Clarification vs implementation change (read before editing)
+- If the user only expresses **confusion about the chart** (e.g. "SMA_20 is not on the price scale", "indicator looks wrong on the chart") and the strategy already compares **volume** to a **volume moving average** (e.g. add_sma on Volume, or column like SMA_*_Volume), that is **expected**: volume and price use different units. **Do not change trading logic or indicator definitions** in that case — output the **same** strategy code as the current working code (preserve behavior exactly).
+- Only change code when the user asks for a different rule, a different parameter/threshold, a bugfix, or a different indicator definition.
+- If the user mixes a chart misunderstanding with a real rule change, apply **only** the real rule change and leave volume-vs-price comparisons correct as they already are.
+
 ## Rules
 - Apply the requested change while preserving the rest of the strategy logic.
 - Keep all tunable parameters as __init__ keyword-only arguments with defaults.
@@ -498,7 +503,10 @@ CHANGE_SUMMARY_PROMPT = """\
 Below is a before/after diff of a Python trading strategy. The user requested this change:
 "{change_request}"
 
-Summarize what was actually changed in 1-2 short bullet points. Be specific about parameter values, \
+If the before and after code is **identical** (or differs only in whitespace), respond with exactly this single bullet:
+- No strategy logic changed — the request was interpretive (e.g. chart scaling / units), not a code fix.
+
+Otherwise summarize what was actually changed in 1-2 short bullet points. Be specific about parameter values, \
 indicators added/removed, or logic changes. No preamble, just the bullets."""
 
 
@@ -1007,12 +1015,14 @@ for chart visualization.
 Classify each computed column into exactly ONE category:
 
 1. **overlay**: Continuous indicators on the SAME SCALE as price — overlay directly on the
-   OHLCV candlestick chart. Examples: SMA, EMA, Bollinger Bands (Upper/Middle/Lower), VWAP,
-   Parabolic SAR, Ichimoku cloud lines, Keltner Channel, Donchian Channel.
+   OHLCV candlestick chart. Examples: SMA/EMA **of Close** (or High/Low typical price), Bollinger Bands,
+   VWAP, Parabolic SAR, Ichimoku lines, Keltner/Donchian channels.
+   **Not overlays:** SMA/EMA **of Volume** (columns like "SMA_20_Volume") — those are volume units, not price.
 
 2. **oscillator**: Continuous indicators on a DIFFERENT SCALE — shown in a sub-panel below
    the price chart. Examples: RSI, MACD, MACD_Signal, MACD_Hist, Stochastic K/D, CCI,
-   Williams %R, ADX, OBV, ATR (if used as a standalone indicator, not just internally).
+   Williams %R, ADX, OBV, ATR (if used as a standalone indicator, not just internally),
+   **moving averages of Volume** (any column that is an MA of "Volume").
 
 3. **internal**: Boolean flags, intermediate calculations, temporary helper columns, or
    values that are NOT meaningful for end-user visualization. Examples: position tracking
@@ -1064,8 +1074,8 @@ Your job is to catch any mistakes and finalize the selection.
 {reasoning}
 
 ## Review Checklist
-1. Are ALL overlay indicators truly on the same scale as price? (e.g., SMA/EMA of price = yes;
-   RSI = no, it's 0-100)
+1. Are ALL overlay indicators truly on the same scale as price? (SMA/EMA **of Close** = yes;
+   SMA/EMA **of Volume** = no — classify as oscillator; RSI = no, it's 0-100)
 2. Are oscillators correctly identified? (different scale, but still meaningful to visualize)
 3. Were any useful continuous indicators mistakenly classified as internal?
 4. Were any temporary/boolean columns mistakenly included as overlay or oscillator?

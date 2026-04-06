@@ -21,7 +21,6 @@ import { BatchProgressModal } from "./BatchProgressModal";
 import { ChatInput } from "./ChatInput";
 import { DateRangePicker } from "./DateRangePicker";
 import { MessageList } from "./MessageList";
-import { StrategyFollowUpSuggestions } from "./StrategyFollowUpSuggestions";
 
 interface ChatProps {
   sessionId: string;
@@ -218,8 +217,8 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
     return () => { cancelled = true; };
   }, [sessionId, versionIdsInMessages.join(",")]);
 
-  // Require naming only when a strategy was created or refined (run_backtest / refine_strategy / fix_strategy). Never when a previously created strategy was rerun.
-  const REQUIRED_TAG_SOURCES = ["run_backtest", "refine_strategy", "fix_strategy"];
+  // Require naming only when a strategy was created or refined. Manifest uses run_backtest | refine | fix; API/docs also use refine_strategy / fix_strategy. Never when rerun.
+  const REQUIRED_TAG_SOURCES = ["run_backtest", "refine", "fix", "refine_strategy", "fix_strategy"];
   const hasUntaggedVersion =
     versionIdsInLastMessage.length > 0 &&
     versionIdsInLastMessage.some(
@@ -288,10 +287,18 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
   const backtestCountRef = useRef(0);
 
   useEffect(() => {
-    const completedCount = messages.filter((m) => m.role === "assistant")
-      .reduce((n, m) => n + (m.blocks.some(
-        (b) => b.type === "progress" && b.step === "Backtest complete" && b.status === "success"
-      ) ? 1 : 0), 0);
+    /** Must match `BACKTEST_DONE` in `backtester/progress_narrative.py` ("Your backtest is ready"). */
+    const backtestReadyStep = "Your backtest is ready";
+    const completedCount = messages.filter((m) => m.role === "assistant").reduce((n, m) => {
+      const hasReadyProgress = m.blocks.some(
+        (b) =>
+          b.type === "progress" &&
+          (b.step === backtestReadyStep || b.step === "Backtest complete") &&
+          b.status === "success"
+      );
+      const hasSavedVersion = m.blocks.some((b) => b.type === "strategy_version");
+      return n + (hasReadyProgress || hasSavedVersion ? 1 : 0);
+    }, 0);
 
     if (completedCount > 0) {
       setHasChartData(true);
@@ -425,11 +432,7 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
     [hasChartData, getChartScreenshot, sendMessage]
   );
 
-  const showStrategyFollowUps = useMemo(() => {
-    if (followUpSuggestions.length === 0 || isLoading || hasUntaggedVersion) return false;
-    return true;
-  }, [followUpSuggestions, isLoading, hasUntaggedVersion]);
-
+  // Show chips whenever the server sent suggestions; disable interaction while a version must be named (same gate as the input).
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header */}
@@ -556,14 +559,6 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
         <div ref={bottomRef} />
       </div>
 
-      {showStrategyFollowUps && (
-        <StrategyFollowUpSuggestions
-          items={followUpSuggestions}
-          onPick={handleSendMessage}
-          disabled={isLoading}
-        />
-      )}
-
       {/* Input */}
       <ChatInput
         sessionId={sessionId}
@@ -575,6 +570,9 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
         onSend={handleSendMessage}
         isLoading={isLoading}
         hasSuccessfulRun={hasSuccessfulRun}
+        followUpSuggestions={isLoading ? [] : followUpSuggestions}
+        onFollowUpPick={handleSendMessage}
+        followUpsDisabled={isLoading || hasUntaggedVersion}
         onRerunTicker={rerunOnTicker}
         onBatchRerunConfirm={handleBatchRerunConfirm}
         onBatchRerunOpenRequest={handleBatchRerunOpenRequest}
