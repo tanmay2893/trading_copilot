@@ -1,21 +1,42 @@
 # Trading Copilot
 
-**Natural-language → executable backtests.** Describe a trading idea in plain English; an LLM generates a small `Strategy` class, runs it on historical OHLCV (via [yfinance](https://github.com/ranaroussi/yfinance)), and iterates until you get coherent buy/sell signals. A **Next.js** UI and **FastAPI** backend provide a chat-style copilot; the same engine powers the **CLI**.
+**Turn your trading idea into a tested strategy in seconds.**
 
+Describe your strategy in plain English. This app writes the logic, runs it on real market history, and shows you **signals on a chart**—so you iterate like you would with a coding agent: run, look at the result, fix what’s wrong, repeat.
 
+---
+
+### Example
+
+**You type:** *“Test a Bollinger Band mean-reversion strategy on SPY”*
+
+**You get:** working backtest code, buy/sell markers on price, and a summary you can refine in chat—without wiring data or libraries by hand.
+
+That loop—**idea → execution → chart → tweak**—is the whole product.
+
+---
 
 https://github.com/user-attachments/assets/b2fcf150-7043-461d-ace9-6e852e270d9c
 
+---
+
+### Features
+
+- **Clearer runs:** backtest and refine show progress as they work, with short status text so you’re not staring at a silent screen.
+- **Smarter next steps:** after a run, the assistant suggests concrete follow-ups so you know what to ask or change next.
+- **Your model, your choice:** pick OpenAI, Anthropic, or DeepSeek from the UI instead of digging through config files.
+- **Chat stays readable:** strategy code is organized in versioned “View code” panels instead of flooding the thread.
+- **Polished iteration:** streaming and UI updates around refining strategies and working with the chart.
 
 ---
 
 ### Compared to general-purpose assistants
 
-Versus ChatGPT and similar tools: they can **explain** indicators and **paste** code, but they do **not** run that code on **your** ticker and dates, apply a **fixed backtest harness**, or show **actual** buy/sell results on a chart. You would still copy snippets, wire data and libraries yourself, and debug outside the chat—without a single, repeatable run tied to your strategy text.
+ChatGPT-style tools can **explain** indicators and **paste** code—but they don’t run that code on **your** ticker and dates inside a **fixed backtest harness**, or show **real** buy/sell results on a chart. You’d still copy snippets, wire data yourself, and debug outside the chat.
 
-**Trading Copilot closes the loop:** you describe an idea → the system **generates** Python → **executes** it on real OHLCV (and corporate fields when relevant) → **validates** output with automated checks → returns **signals**, a **trade summary**, and an interactive **chart** with markers. You stay in one thread to **refine** entries, fix bugs, or rerun on another symbol—every turn grounded in **real execution**, not prose alone.
+**Trading Copilot closes the loop:** describe an idea → the system **generates** Python → **runs** it on real OHLCV (and corporate fields when relevant) → **checks** the output → returns **signals**, a **trade summary**, and an interactive **chart**. You stay in one place to **refine** entries, fix bugs, or rerun on another symbol—every turn grounded in **actual execution**, not prose alone.
 
-In short: **automatic run + validation + chart + summary**, and **conversational iteration on your logic** in a workflow purpose-built for backtests—not a generic Q&A panel.
+In short: **run + validation + chart + summary**, and **conversational iteration** on your logic—built for backtests, not generic Q&A.
 
 ### Sample strategies
 
@@ -32,7 +53,7 @@ Use these as inspiration in chat or with the CLI (`--strategy "..."`). The model
 
 The Python package is **`backtester`** (`pip install -e .`, see `pyproject.toml`).
 
-[Demo](#demo) · [Compared to general chat](#compared-to-general-purpose-assistants) · [Sample strategies](#sample-strategies) · [Workflow](#workflow-like-claude-code-for-trading-strategies) · [Docker (preferred)](#run-with-docker-preferred) · [Run manually](#run-manually-backend--frontend) · [Web app](#web-app) · [CLI](#cli-quick-start) · [Corporate examples](#corporate-strategy-examples) · [How it works](#how-it-works) · [LLM keys](#llm-providers) · [Future improvements](#future-improvements)
+[Demo](#Example) · [Features](#features) · [Compared to general chat](#compared-to-general-purpose-assistants) · [Sample strategies](#sample-strategies) · [Workflow](#workflow-like-claude-code-for-trading-strategies) · [Docker (start here)](#run-with-docker-start-here) · [Web app](#web-app) · [CLI](#cli-quick-start) · [Corporate examples](#corporate-strategy-examples) · [How it works](#how-it-works) · [LLM keys](#llm-providers) · [Optional: run without Docker](#optional-run-without-docker-dev-setup) · [Future improvements](#future-improvements)
 
 <p align="center">
   <img src="recordings/chart-msft-demo.png" alt="Sample price chart with backtest signals" width="720" />
@@ -50,9 +71,9 @@ You are not guessing in the dark. Open the **chart** with **buy/sell markers** a
 
 ---
 
-## Run with Docker (preferred)
+## Run with Docker (start here)
 
-**Docker is the simpler way to run the full app** (web UI + API): one install, one command, no Python virtualenv or Node.js setup on your machine. Prefer this unless you are actively developing the repo and want separate hot reload for Python and Next.js ([run manually](#run-manually-backend--frontend) below).
+**Docker is the simplest way to run the full app** (web UI + API): one install, one command—no Python virtualenv or Node.js setup on your machine. Use [optional dev setup](#optional-run-without-docker-dev-setup) only if you are actively developing the repo and want hot reload for Python and Next.js.
 
 ### New to Docker? Install Docker Desktop first
 
@@ -98,54 +119,9 @@ More detail, persistence, and troubleshooting: **[docker/README.md](docker/READM
 
 ---
 
-## Run manually (backend + frontend)
-
-Use this when you want **hot reload** and a local **Python + Node** workflow. It is more steps than [Docker](#run-with-docker-preferred); choose it for day-to-day development on the codebase.
-
-### 1. Backend (FastAPI)
-
-From the **repository root**, with Python 3.10+:
-
-```bash
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
-
-pip install -e .
-
-cp backtester/.env.example backtester/.env
-# Edit backtester/.env — add OPENAI_API_KEY, ANTHROPIC_API_KEY, and/or DEEPSEEK_API_KEY
-
-uvicorn backtester.api.server:app --reload --port 6700
-```
-
-The dev frontend expects the API on **port 6700** (see `frontend/next.config.ts`). If you use another port, update the rewrite `destination` there (or set `NEXT_PUBLIC_*` for a production build).
-
-**Check:** http://localhost:6700/api/health
-
-### 2. Frontend (Next.js)
-
-Second terminal:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-**Open:** http://localhost:3070 (`npm run dev` uses port **3070** per `frontend/package.json`.)
-
-**How traffic flows in dev:** Browser → Next on **3070**; `/api/*` is rewritten to `http://localhost:6700/api/*`. WebSockets for chat use **6700** directly (`NEXT_PUBLIC_WS_URL` in [frontend/.env.example](frontend/.env.example) if you need to override).
-
-**Optional:** Copy `frontend/.env.example` to `frontend/.env.local` if your backend URL or WebSocket URL is non-default.
-
-**Ngrok / single origin:** See [frontend/README.md](frontend/README.md) for `dev:proxy` (default port **3080**).
-
----
-
 ## Web app
 
-The UI is a **chat workspace** tied to your FastAPI backend: you describe or refine strategies, inspect generated Python, open an interactive **chart**, and manage **saved strategy versions**. The screenshots below were taken in **Google Chrome** while running the stack locally (`uvicorn` + `npm run dev`). If you use Docker, the app is the same; only the URL changes (e.g. http://localhost:3000).
+The UI is a **chat workspace** tied to your FastAPI backend: you describe or refine strategies, inspect generated Python, open an interactive **chart**, and manage **saved strategy versions**. The screenshots below were taken in **Google Chrome** while running the stack locally. If you use Docker, the app is the same; only the URL changes (e.g. http://localhost:3000).
 
 ### Layout and workspace
 
@@ -207,7 +183,7 @@ Assistant replies can show **input/output token counts**, the **model** used (e.
 
 ## CLI quick start
 
-Same venv as above (`pip install -e .` and `backtester/.env` with keys).
+Same venv as in [optional dev setup](#optional-run-without-docker-dev-setup) (`pip install -e .` and `backtester/.env` with keys).
 
 ```bash
 backtester run \
@@ -343,6 +319,51 @@ REST lives under **`/api`**; the agent uses WebSockets on the same host/port as 
 | `opus` | `ANTHROPIC_API_KEY` |
 
 Optional: `DEFAULT_MODEL`, `MAX_ITERATIONS` in `backtester/.env` ([backtester/.env.example](backtester/.env.example)).
+
+---
+
+## Optional: run without Docker (dev setup)
+
+Use this when you want **hot reload** and a local **Python + Node** workflow for working on the codebase. For everyday use, [Docker](#run-with-docker-start-here) is simpler.
+
+### 1. Backend (FastAPI)
+
+From the **repository root**, with Python 3.10+:
+
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
+
+pip install -e .
+
+cp backtester/.env.example backtester/.env
+# Edit backtester/.env — add OPENAI_API_KEY, ANTHROPIC_API_KEY, and/or DEEPSEEK_API_KEY
+
+uvicorn backtester.api.server:app --reload --port 6700
+```
+
+The dev frontend expects the API on **port 6700** (see `frontend/next.config.ts`). If you use another port, update the rewrite `destination` there (or set `NEXT_PUBLIC_*` for a production build).
+
+**Check:** http://localhost:6700/api/health
+
+### 2. Frontend (Next.js)
+
+Second terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+**Open:** http://localhost:3070 (`npm run dev` uses port **3070** per `frontend/package.json`.)
+
+**How traffic flows in dev:** Browser → Next on **3070**; `/api/*` is rewritten to `http://localhost:6700/api/*`. WebSockets for chat use **6700** directly (`NEXT_PUBLIC_WS_URL` in [frontend/.env.example](frontend/.env.example) if you need to override).
+
+**Optional:** Copy `frontend/.env.example` to `frontend/.env.local` if your backend URL or WebSocket URL is non-default.
+
+**Ngrok / single origin:** See [frontend/README.md](frontend/README.md) for `dev:proxy` (default port **3080**).
 
 ---
 
