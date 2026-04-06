@@ -21,6 +21,7 @@ import { BatchProgressModal } from "./BatchProgressModal";
 import { ChatInput } from "./ChatInput";
 import { DateRangePicker } from "./DateRangePicker";
 import { MessageList } from "./MessageList";
+import { StrategyFollowUpSuggestions } from "./StrategyFollowUpSuggestions";
 
 interface ChatProps {
   sessionId: string;
@@ -77,6 +78,7 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
     dismissDateRangePicker,
     sessionDateRange,
     latestStrategyCode,
+    followUpSuggestions,
   } = useChat(sessionId, {
     onDoneRef: openChartOnDoneRef ?? undefined,
     sessionModel,
@@ -415,6 +417,19 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
     );
   };
 
+  const handleSendMessage = useCallback(
+    (msg: string) => {
+      const screenshot = hasChartData && getChartScreenshot ? getChartScreenshot() : null;
+      sendMessage(msg, screenshot);
+    },
+    [hasChartData, getChartScreenshot, sendMessage]
+  );
+
+  const showStrategyFollowUps = useMemo(() => {
+    if (followUpSuggestions.length === 0 || isLoading || hasUntaggedVersion) return false;
+    return true;
+  }, [followUpSuggestions, isLoading, hasUntaggedVersion]);
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header */}
@@ -541,6 +556,14 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
         <div ref={bottomRef} />
       </div>
 
+      {showStrategyFollowUps && (
+        <StrategyFollowUpSuggestions
+          items={followUpSuggestions}
+          onPick={handleSendMessage}
+          disabled={isLoading}
+        />
+      )}
+
       {/* Input */}
       <ChatInput
         sessionId={sessionId}
@@ -549,10 +572,7 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
         llmModelOptions={llmModelOptions}
         llmModelId={llmModelId}
         onLlmModelChange={handleLlmModelChange}
-        onSend={(msg) => {
-          const screenshot = hasChartData && getChartScreenshot ? getChartScreenshot() : null;
-          sendMessage(msg, screenshot);
-        }}
+        onSend={handleSendMessage}
         isLoading={isLoading}
         hasSuccessfulRun={hasSuccessfulRun}
         onRerunTicker={rerunOnTicker}

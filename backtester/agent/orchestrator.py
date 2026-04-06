@@ -13,10 +13,12 @@ from typing import Callable, Awaitable
 from backtester.agent.events import (
     DoneEvent,
     ErrorEvent,
+    FollowUpSuggestionsEvent,
     TextEvent,
     ToolEndEvent,
     ToolStartEvent,
 )
+from backtester.agent.follow_up_suggestions import generate_follow_up_suggestions
 from backtester.agent.prompts import TOOL_SCHEMAS, build_orchestrator_system_prompt
 from backtester.agent.session import ChatSession
 from backtester.agent.tools import execute_tool
@@ -67,6 +69,7 @@ async def agent_loop(
         last_model = response.model or ""
 
         if response.content and not response.tool_calls:
+            vid_for_followups = pending_strategy_version_id
             session.add_message(
                 "assistant",
                 response.content,
@@ -74,6 +77,17 @@ async def agent_loop(
             )
             pending_strategy_version_id = None
             await on_event(TextEvent(content=response.content))
+            if vid_for_followups:
+                try:
+                    suggestions, sug_in, sug_out = generate_follow_up_suggestions(
+                        session, provider, user_message
+                    )
+                    total_input_tokens += sug_in
+                    total_output_tokens += sug_out
+                    if suggestions:
+                        await on_event(FollowUpSuggestionsEvent(suggestions=suggestions))
+                except Exception as exc:
+                    log.warning("follow_up_suggestions failed: %s", exc)
             await on_event(DoneEvent(
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,

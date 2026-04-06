@@ -13,7 +13,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backtester.agent.date_range_infer import infer_suggested_backtest_dates
-from backtester.agent.events import DoneEvent, ErrorEvent, RequestDateRangeEvent
+from backtester.agent.events import DoneEvent, ErrorEvent, FollowUpSuggestionsEvent, RequestDateRangeEvent
+from backtester.agent.follow_up_suggestions import generate_follow_up_suggestions
 from backtester.agent.orchestrator import agent_loop
 from backtester.agent.session import ChatSession
 from backtester.agent.tools import handle_rerun_on_ticker
@@ -163,8 +164,9 @@ async def chat_ws(websocket: WebSocket, session_id: str):
                     except Exception:
                         pass
 
+                rerun_result: dict = {}
                 try:
-                    await handle_rerun_on_ticker(
+                    rerun_result = await handle_rerun_on_ticker(
                         session=session,
                         on_event=on_rerun_event,
                         ticker=ticker,
@@ -176,7 +178,32 @@ async def chat_ws(websocket: WebSocket, session_id: str):
                 except Exception as exc:
                     log.exception("Rerun error")
                     await websocket.send_json(ErrorEvent(message=str(exc)).to_dict())
-                await websocket.send_json(DoneEvent().to_dict())
+                    await websocket.send_json(DoneEvent().to_dict())
+                    session.save()
+                    continue
+
+                sug_in, sug_out = 0, 0
+                if rerun_result.get("success") and rerun_result.get("rerun_strategy_version_id"):
+                    try:
+                        rp = provider
+                        if rp is None:
+                            rp = get_provider(session.model, llm_model_id=session.llm_model_id)
+                            provider = rp
+                        suggestions, sug_in, sug_out = generate_follow_up_suggestions(
+                            session,
+                            rp,
+                            f"Run the same strategy on {ticker}",
+                        )
+                        if suggestions:
+                            await websocket.send_json(
+                                FollowUpSuggestionsEvent(suggestions=suggestions).to_dict()
+                            )
+                    except Exception as exc:
+                        log.warning("Rerun follow_up_suggestions failed: %s", exc)
+
+                await websocket.send_json(
+                    DoneEvent(input_tokens=sug_in, output_tokens=sug_out, model="").to_dict()
+                )
                 session.save()
                 continue
 

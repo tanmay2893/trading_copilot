@@ -100,6 +100,9 @@ export function useChat(sessionId: string, options?: UseChatOptions) {
   const [dateRangeSuggestedEnd, setDateRangeSuggestedEnd] = useState<string | null>(null);
   const [sessionDateRange, setSessionDateRange] = useState<{ start_date: string; end_date: string } | null>(null);
 
+  /** LLM-generated next-step chips (set after strategy_version, cleared on new send). */
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<{ label: string; prompt: string }[]>([]);
+
   /** Cumulative token usage for this chat session (updated on each "done" with usage). */
   const [usage, setUsage] = useState<{
     inputTokens: number;
@@ -188,6 +191,20 @@ export function useChat(sessionId: string, options?: UseChatOptions) {
       case "tool_start":
       case "tool_end":
         break;
+      case "follow_up_suggestions": {
+        const raw = (event as { suggestions?: unknown }).suggestions;
+        const list: { label: string; prompt: string }[] = [];
+        if (Array.isArray(raw)) {
+          for (const item of raw) {
+            if (!item || typeof item !== "object") continue;
+            const label = String((item as { label?: unknown }).label ?? "").trim();
+            const prompt = String((item as { prompt?: unknown }).prompt ?? "").trim();
+            if (label && prompt) list.push({ label, prompt });
+          }
+        }
+        setFollowUpSuggestions(list.slice(0, 3));
+        break;
+      }
       case "done": {
         setIsLoading(false);
         const doneEv = event as DoneEvent;
@@ -272,6 +289,10 @@ export function useChat(sessionId: string, options?: UseChatOptions) {
     };
   }, [connect]);
 
+  useEffect(() => {
+    setFollowUpSuggestions([]);
+  }, [sessionId]);
+
   // Load conversation history from the server on first mount
   const [hasChartDataFromServer, setHasChartDataFromServer] = useState(false);
   const [hasSuccessfulRunFromServer, setHasSuccessfulRunFromServer] = useState(false);
@@ -327,6 +348,7 @@ export function useChat(sessionId: string, options?: UseChatOptions) {
       setDateRangeSuggestedEnd(null);
       setSessionDateRange({ start_date: startDate, end_date: endDate });
       setIsLoading(true);
+      setFollowUpSuggestions([]);
       wsRef.current.send(
         JSON.stringify({
           type: "date_range",
@@ -371,6 +393,7 @@ export function useChat(sessionId: string, options?: UseChatOptions) {
       setIsLoading(true);
       assistantBlocksRef.current = [];
       assistantIdRef.current = "";
+      setFollowUpSuggestions([]);
 
       const payload: Record<string, string> = {
         type: "message",
@@ -411,6 +434,7 @@ export function useChat(sessionId: string, options?: UseChatOptions) {
       setIsLoading(true);
       assistantBlocksRef.current = [];
       assistantIdRef.current = "";
+      setFollowUpSuggestions([]);
 
       const payload: {
         type: "rerun";
@@ -481,5 +505,6 @@ export function useChat(sessionId: string, options?: UseChatOptions) {
     dismissDateRangePicker,
     sessionDateRange,
     latestStrategyCode,
+    followUpSuggestions,
   };
 }

@@ -22,6 +22,7 @@ class EventType(str, Enum):
     DONE = "done"
     REQUEST_DATE_RANGE = "request_date_range"
     STRATEGY_VERSION = "strategy_version"
+    FOLLOW_UP_SUGGESTIONS = "follow_up_suggestions"
 
 
 @dataclass
@@ -113,3 +114,11 @@ class StrategyVersionEvent(BaseEvent):
     """Notify the client that a new strategy code version has been created."""
     version_id: str = ""
     type: str = field(default=EventType.STRATEGY_VERSION, init=False)
+
+
+@dataclass
+class FollowUpSuggestionsEvent(BaseEvent):
+    """LLM-generated suggested next user messages (label + full prompt each)."""
+
+    suggestions: list[dict] = field(default_factory=list)
+    type: str = field(default=EventType.FOLLOW_UP_SUGGESTIONS, init=False)

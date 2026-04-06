@@ -1554,6 +1554,7 @@ async def handle_rerun_on_ticker(
         "sell_signals": sell_count,
         "first_signal_date": first_date,
         "last_signal_date": last_date,
+        "rerun_strategy_version_id": rerun_ui_vid or None,
     }
 
 

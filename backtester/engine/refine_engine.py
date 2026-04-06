@@ -188,8 +188,8 @@ def run_refine_turn(
                     "error_type": "INVARIANT_VIOLATION",
                     "message": "; ".join(invariant_issues) + f"\n\nSignal diff:\n{diff_text}",
                     "traceback": "",
-            }
-            continue
+                }
+                continue
 
         result.success = True
         result.signals_df = exec_result.output_df
