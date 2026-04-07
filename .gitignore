@@ -40,6 +40,10 @@ out/
 .turbo/
 *.tsbuildinfo
 
+backtester/arena/
+frontend/app/arena/
+frontend/app/bots/
+frontend/components/BacktesterWorkspace.tsx
 # IDE and OS
 .idea/
 .vscode/
