@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from backtester.agent.session import ChatSession
+from backtester.agent.tools import compute_chart_backtest_extras
 from backtester.api import key_store
 from backtester.llm.key_verify import (
     verify_anthropic_api_key,
@@ -560,12 +561,21 @@ async def get_chart_data(session_id: str, request: Request):
                 series.append({"time": str(row[date_col]), "value": val})
         indicators[col] = series
 
+    equity_curve = None
+    backtest_summary = None
+    if signals_df is not None and len(signals_df) > 0:
+        ec, summ = compute_chart_backtest_extras(signals_df)
+        equity_curve = ec
+        backtest_summary = summ
+
     return {
         "ticker": session.active_ticker or "",
         "interval": session.active_interval or "",
         "ohlcv": ohlcv,
         "signals": signals,
         "indicators": indicators,
+        "equity_curve": equity_curve,
+        "backtest_summary": backtest_summary,
     }
 
 

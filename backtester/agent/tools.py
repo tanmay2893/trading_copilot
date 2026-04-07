@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import math
+import statistics
 import traceback
 import uuid
 from pathlib import Path
@@ -1150,6 +1151,58 @@ def _compute_backtest_summary(pairs: list[dict]) -> dict[str, str]:
         "Max Consecutive Wins": str(max_cw),
         "Max Consecutive Losses": str(max_cl),
     }
+
+
+def compute_chart_backtest_extras(
+    signals_df: pd.DataFrame | None,
+) -> tuple[list[dict[str, float | str]], dict[str, str]] | tuple[None, None]:
+    """Build equity curve points and summary (including max drawdown and trade-based Sharpe) for the chart API."""
+    if signals_df is None or len(signals_df) == 0:
+        return None, None
+    pairs = _signals_to_trade_pairs(signals_df)
+    summary = _compute_backtest_summary(pairs)
+
+    equity_curve: list[dict[str, float | str]] = []
+    if pairs:
+        sorted_pairs = sorted(pairs, key=lambda p: p["exit_date"])
+
+        def fmt_d(d) -> str:
+            if hasattr(d, "strftime"):
+                return d.strftime("%Y-%m-%d")
+            s = str(d)
+            return s[:10] if len(s) >= 10 else s
+
+        cum = 100.0
+        equity_curve.append({"time": fmt_d(sorted_pairs[0]["entry_date"]), "equity": cum})
+        for t in sorted_pairs:
+            cum += float(t["pnl_pct"])
+            equity_curve.append({"time": fmt_d(t["exit_date"]), "equity": round(cum, 6)})
+
+    equities = [float(p["equity"]) for p in equity_curve] if equity_curve else []
+    if equities:
+        peak = equities[0]
+        max_dd = 0.0
+        for x in equities:
+            peak = max(peak, x)
+            if peak > 0:
+                max_dd = max(max_dd, (peak - x) / peak * 100.0)
+        summary["Max Drawdown (%)"] = f"{max_dd:.2f}%"
+    else:
+        summary["Max Drawdown (%)"] = "—"
+
+    pnl_pcts = [float(t["pnl_pct"]) for t in pairs]
+    if len(pnl_pcts) > 1:
+        m = statistics.mean(pnl_pcts)
+        s = statistics.stdev(pnl_pcts)
+        if s > 0 and math.isfinite(m):
+            sharpe = (m / s) * math.sqrt(len(pnl_pcts))
+            summary["Sharpe (approx., trades)"] = f"{sharpe:.2f}" if math.isfinite(sharpe) else "—"
+        else:
+            summary["Sharpe (approx., trades)"] = "—"
+    else:
+        summary["Sharpe (approx., trades)"] = "—"
+
+    return equity_curve, summary
 
 
 def compute_backtest_metrics_numeric(signals_df: pd.DataFrame | None) -> dict[str, float | None]:

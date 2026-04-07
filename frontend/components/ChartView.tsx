@@ -115,18 +115,26 @@ function parseTime(raw: string): Time {
 export const ChartView = forwardRef<ChartViewHandle, ChartViewProps>(function ChartView({ sessionId, onBack, dataVersion }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
+  const equityChartRef = useRef<IChartApi | null>(null);
+  const equityContainerRef = useRef<HTMLDivElement>(null);
+  const chartPanelRef = useRef<"price" | "equity">("price");
   const seriesRefsRef = useRef<Map<string, ISeriesApi<"Line" | "Histogram", Time>>>(new Map());
   const visibilityRef = useRef<Record<string, boolean>>({});
   const [data, setData] = useState<ChartData | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [indicatorVisibility, setIndicatorVisibility] = useState<Record<string, boolean>>({});
+  /** Price candles vs cumulative equity + backtest summary table. */
+  const [chartPanel, setChartPanel] = useState<"price" | "equity">("price");
+
+  chartPanelRef.current = chartPanel;
 
   useImperativeHandle(ref, () => ({
     takeScreenshot: () => {
-      if (!chartRef.current) return null;
+      const api = chartPanelRef.current === "equity" ? equityChartRef.current : chartRef.current;
+      if (!api) return null;
       try {
-        const canvas = chartRef.current.takeScreenshot();
+        const canvas = api.takeScreenshot();
         return canvas.toDataURL("image/png");
       } catch {
         return null;
@@ -137,6 +145,7 @@ export const ChartView = forwardRef<ChartViewHandle, ChartViewProps>(function Ch
   useEffect(() => {
     setLoading(true);
     setError("");
+    setChartPanel("price");
     fetchChartData(sessionId)
       .then(setData)
       .catch((e) => setError(e.message))
@@ -291,6 +300,12 @@ export const ChartView = forwardRef<ChartViewHandle, ChartViewProps>(function Ch
     return items;
   }, [data]);
 
+  const summaryEntries = useMemo(() => {
+    const s = data?.backtest_summary;
+    if (!s) return [];
+    return Object.entries(s);
+  }, [data?.backtest_summary]);
+
   useEffect(() => {
     if (legendItems.length === 0) return;
     setIndicatorVisibility((prev) => {
@@ -329,6 +344,69 @@ export const ChartView = forwardRef<ChartViewHandle, ChartViewProps>(function Ch
     };
   }, [buildChart]);
 
+  useEffect(() => {
+    if (chartPanel !== "equity" || !data?.equity_curve?.length || !equityContainerRef.current) {
+      if (equityChartRef.current) {
+        equityChartRef.current.remove();
+        equityChartRef.current = null;
+      }
+      return;
+    }
+
+    const el = equityContainerRef.current;
+    if (equityChartRef.current) {
+      equityChartRef.current.remove();
+      equityChartRef.current = null;
+    }
+
+    const chart = createChart(el, {
+      layout: {
+        background: { type: ColorType.Solid, color: "#0a0a0f" },
+        textColor: "#9494a8",
+        fontFamily: "'Inter', sans-serif",
+        fontSize: 12,
+      },
+      grid: {
+        vertLines: { color: "#1a1a2e" },
+        horzLines: { color: "#1a1a2e" },
+      },
+      crosshair: { mode: CrosshairMode.Normal },
+      rightPriceScale: { borderColor: "#2a2a3e" },
+      timeScale: {
+        borderColor: "#2a2a3e",
+        timeVisible: true,
+        secondsVisible: false,
+      },
+    });
+    equityChartRef.current = chart;
+
+    const line = chart.addSeries(LineSeries, {
+      color: "#38bdf8",
+      lineWidth: 2,
+      title: "Equity (index)",
+    });
+    const lineData: LineData[] = data.equity_curve.map((p) => ({
+      time: parseTime(p.time),
+      value: p.equity,
+    }));
+    line.setData(lineData);
+    chart.timeScale().fitContent();
+
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        chart.applyOptions({ width, height });
+      }
+    });
+    ro.observe(el);
+
+    return () => {
+      ro.disconnect();
+      chart.remove();
+      equityChartRef.current = null;
+    };
+  }, [chartPanel, data]);
+
   const buyCount = data?.signals.filter((s) => s.signal === "BUY").length ?? 0;
   const sellCount = data?.signals.filter((s) => s.signal === "SELL").length ?? 0;
 
@@ -354,17 +432,59 @@ export const ChartView = forwardRef<ChartViewHandle, ChartViewProps>(function Ch
               <span className="text-xs px-2 py-0.5 rounded bg-[var(--bg-tertiary)] text-[var(--text-muted)] font-mono">
                 {data.interval}
               </span>
+              {data.backtest_summary && (
+                <div
+                  className="flex rounded-lg border border-[var(--border)] p-0.5 bg-[var(--bg-primary)] ml-1"
+                  role="tablist"
+                  aria-label="Chart view"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={chartPanel === "price"}
+                    onClick={() => setChartPanel("price")}
+                    className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                      chartPanel === "price"
+                        ? "bg-[var(--accent)] text-white"
+                        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    }`}
+                  >
+                    Price
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={chartPanel === "equity"}
+                    onClick={() => setChartPanel("equity")}
+                    className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                      chartPanel === "equity"
+                        ? "bg-[var(--accent)] text-white"
+                        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    }`}
+                  >
+                    Equity
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
         {data && (
-          <div className="flex items-center gap-4 text-xs">
-            <span className="text-[var(--success)]">{buyCount} BUY</span>
-            <span className="text-[var(--error)]">{sellCount} SELL</span>
-            <span className="text-[var(--text-muted)]">{data.ohlcv.length} bars</span>
-            {Object.keys(data.indicators).length > 0 && (
-              <span className="text-[var(--text-muted)]">
-                {Object.keys(data.indicators).length} indicator{Object.keys(data.indicators).length !== 1 ? "s" : ""}
+          <div className="flex items-center gap-4 text-xs flex-wrap justify-end">
+            {chartPanel === "price" ? (
+              <>
+                <span className="text-[var(--success)]">{buyCount} BUY</span>
+                <span className="text-[var(--error)]">{sellCount} SELL</span>
+                <span className="text-[var(--text-muted)]">{data.ohlcv.length} bars</span>
+                {Object.keys(data.indicators).length > 0 && (
+                  <span className="text-[var(--text-muted)]">
+                    {Object.keys(data.indicators).length} indicator{Object.keys(data.indicators).length !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="text-[var(--text-muted)] max-w-md text-right">
+                Equity index starts at 100; each closed trade adds its return %. Sharpe is a coarse trade-return metric.
               </span>
             )}
           </div>
@@ -372,9 +492,9 @@ export const ChartView = forwardRef<ChartViewHandle, ChartViewProps>(function Ch
       </header>
 
       {/* Chart area */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative flex flex-col min-h-0">
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
+          <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-primary)] z-20">
             <div className="flex items-center gap-3 text-[var(--text-muted)]">
               <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4 31.4" strokeLinecap="round" />
@@ -384,7 +504,7 @@ export const ChartView = forwardRef<ChartViewHandle, ChartViewProps>(function Ch
           </div>
         )}
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-primary)]">
+          <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-primary)] z-20">
             <div className="text-center">
               <p className="text-[var(--error)] mb-2">{error}</p>
               <button
@@ -396,7 +516,7 @@ export const ChartView = forwardRef<ChartViewHandle, ChartViewProps>(function Ch
             </div>
           </div>
         )}
-        {!loading && !error && legendItems.length > 0 && (
+        {!loading && !error && chartPanel === "price" && legendItems.length > 0 && (
           <div className="absolute top-3 left-3 z-10 flex flex-col gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)]/95 px-3 py-2 shadow-lg backdrop-blur-sm">
             <span className="text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)] mb-0.5">
               Indicators
@@ -424,7 +544,38 @@ export const ChartView = forwardRef<ChartViewHandle, ChartViewProps>(function Ch
             })}
           </div>
         )}
-        <div ref={containerRef} className="w-full h-full" />
+        {!loading && !error && chartPanel === "price" && (
+          <div ref={containerRef} className="w-full flex-1 min-h-0" />
+        )}
+        {!loading && !error && chartPanel === "equity" && data?.backtest_summary && (
+          <div className="flex flex-col flex-1 min-h-0 w-full">
+            {data.equity_curve && data.equity_curve.length > 0 ? (
+              <div ref={equityContainerRef} className="w-full flex-1 min-h-[220px]" />
+            ) : (
+              <div className="flex-shrink-0 px-6 py-4 text-sm text-[var(--text-muted)] border-b border-[var(--border)]">
+                No completed trade pairs yet — equity curve appears after closed long/short trades. Summary below still reflects the run.
+              </div>
+            )}
+            <div className="flex-shrink-0 overflow-auto max-h-[min(42vh,420px)] border-t border-[var(--border)] bg-[var(--bg-secondary)]/40">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-[var(--border)] text-left text-[var(--text-muted)]">
+                    <th className="py-2 pl-4 pr-2 font-medium">Metric</th>
+                    <th className="py-2 pl-2 pr-4 font-medium">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {summaryEntries.map(([metric, value]) => (
+                    <tr key={metric} className="border-b border-[var(--border)]/60 hover:bg-[var(--bg-tertiary)]/30">
+                      <td className="py-1.5 pl-4 pr-2 text-[var(--text-secondary)] align-top whitespace-nowrap">{metric}</td>
+                      <td className="py-1.5 pl-2 pr-4 text-[var(--text-primary)] font-mono text-[11px]">{value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
