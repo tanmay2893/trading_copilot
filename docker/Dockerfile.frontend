@@ -9,6 +9,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY frontend/ ./
 
+# Standalone runner copies /app/public; ensure the dir exists when the repo has no tracked public assets.
+RUN mkdir -p public
+
 # Browser must use the /api prefix (FastAPI mount). Trailing path is optional; api.ts also normalizes.
 ARG NEXT_PUBLIC_API_URL=http://localhost:6700/api
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
