@@ -20,6 +20,26 @@ def verify_openai_api_key(api_key: str) -> tuple[bool, str]:
         return False, (str(e) or type(e).__name__)[:400]
 
 
+def verify_nvidia_qwen_api_key(api_key: str) -> tuple[bool, str]:
+    key = (api_key or "").strip()
+    if not key:
+        return False, "Empty API key"
+    try:
+        from openai import OpenAI
+
+        from backtester.llm.nvidia_qwen_provider import DEFAULT_MODEL, NVIDIA_BASE_URL
+
+        client = OpenAI(api_key=key, base_url=NVIDIA_BASE_URL)
+        client.chat.completions.create(
+            model=DEFAULT_MODEL,
+            messages=[{"role": "user", "content": "ok"}],
+            max_tokens=1,
+        )
+        return True, ""
+    except Exception as e:
+        return False, (str(e) or type(e).__name__)[:400]
+
+
 def verify_deepseek_api_key(api_key: str) -> tuple[bool, str]:
     key = (api_key or "").strip()
     if not key:

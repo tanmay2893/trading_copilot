@@ -6,14 +6,20 @@ import threading
 from typing import Literal
 
 _lock = threading.Lock()
-_keys: dict[str, str] = {"openai": "", "anthropic": "", "deepseek": ""}
+_keys: dict[str, str] = {"openai": "", "anthropic": "", "deepseek": "", "nvidia_qwen": ""}
 
-KeyKind = Literal["openai", "anthropic", "deepseek"]
+KeyKind = Literal["openai", "anthropic", "deepseek", "nvidia_qwen"]
 
 
 def set_key(kind: KeyKind, value: str) -> None:
     with _lock:
         _keys[kind] = value.strip()
+
+
+def get_nvidia_qwen_key() -> str:
+    """NVIDIA NIM API key for Qwen (web chat only)."""
+    with _lock:
+        return _keys.get("nvidia_qwen", "")
 
 
 def get_stored_api_key(model_alias: str) -> str:
@@ -35,4 +41,5 @@ def configured_flags() -> dict[str, bool]:
             "openai_configured": bool(_keys["openai"]),
             "anthropic_configured": bool(_keys["anthropic"]),
             "deepseek_configured": bool(_keys["deepseek"]),
+            "nvidia_qwen_configured": bool(_keys.get("nvidia_qwen", "")),
         }

@@ -44,6 +44,7 @@ export function LlmSettingsProvider({ children }: { children: ReactNode }) {
         openai_configured: false,
         anthropic_configured: false,
         deepseek_configured: false,
+        nvidia_qwen_configured: false,
       });
     }
   }, []);
@@ -61,11 +62,17 @@ export function LlmSettingsProvider({ children }: { children: ReactNode }) {
       }
       if (!raw) return;
       try {
-        const p = JSON.parse(raw) as { openai?: string; anthropic?: string; deepseek?: string };
+        const p = JSON.parse(raw) as {
+          openai?: string;
+          anthropic?: string;
+          deepseek?: string;
+          nvidia_qwen?: string;
+        };
         await postGlobalLlmKeys({
           openai_api_key: p.openai ?? "",
           anthropic_api_key: p.anthropic ?? "",
           deepseek_api_key: p.deepseek ?? "",
+          nvidia_qwen_api_key: p.nvidia_qwen ?? "",
         });
         if (!cancelled) await refreshStatus();
       } catch {
@@ -102,6 +109,7 @@ export function LlmSettingsProvider({ children }: { children: ReactNode }) {
   const hasUsableLlmForSession = useCallback(
     (model: string) => {
       if (!status) return false;
+      if (status.nvidia_qwen_configured) return true;
       const m = model.toLowerCase();
       const chain: ("openai" | "opus" | "deepseek")[] =
         m === "openai"
@@ -165,6 +173,7 @@ function LlmSettingsModal() {
   const [openai, setOpenai] = useState("");
   const [anthropic, setAnthropic] = useState("");
   const [deepseek, setDeepseek] = useState("");
+  const [nvidiaQwen, setNvidiaQwen] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -174,19 +183,27 @@ function LlmSettingsModal() {
     try {
       const raw = localStorage.getItem(LLM_KEYS_STORAGE_KEY);
       if (raw) {
-        const p = JSON.parse(raw) as { openai?: string; anthropic?: string; deepseek?: string };
+        const p = JSON.parse(raw) as {
+          openai?: string;
+          anthropic?: string;
+          deepseek?: string;
+          nvidia_qwen?: string;
+        };
         setOpenai(p.openai ?? "");
         setAnthropic(p.anthropic ?? "");
         setDeepseek(p.deepseek ?? "");
+        setNvidiaQwen(p.nvidia_qwen ?? "");
       } else {
         setOpenai("");
         setAnthropic("");
         setDeepseek("");
+        setNvidiaQwen("");
       }
     } catch {
       setOpenai("");
       setAnthropic("");
       setDeepseek("");
+      setNvidiaQwen("");
     }
   }, [settingsOpen]);
 
@@ -201,8 +218,11 @@ function LlmSettingsModal() {
         openai_api_key: openai,
         anthropic_api_key: anthropic,
         deepseek_api_key: deepseek,
+        nvidia_qwen_api_key: nvidiaQwen,
       });
-      const failed = [res.openai, res.anthropic, res.deepseek].filter((x) => x.status === "failed");
+      const failed = [res.openai, res.anthropic, res.deepseek, res.nvidia_qwen].filter(
+        (x) => x.status === "failed"
+      );
       if (failed.length > 0) {
         const parts = failed.map((x) => x.error).filter(Boolean);
         setError(parts.join(" · ") || "Verification failed");
@@ -212,7 +232,7 @@ function LlmSettingsModal() {
       try {
         localStorage.setItem(
           LLM_KEYS_STORAGE_KEY,
-          JSON.stringify({ openai, anthropic, deepseek })
+          JSON.stringify({ openai, anthropic, deepseek, nvidia_qwen: nvidiaQwen })
         );
       } catch {
         /* ignore */
@@ -298,6 +318,25 @@ function LlmSettingsModal() {
               placeholder="sk-… (if you use deepseek model)"
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-2 text-sm"
             />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-[var(--text-secondary)]">
+              NVIDIA (Qwen Coder — chat)
+            </label>
+            <input
+              type="password"
+              autoComplete="off"
+              value={nvidiaQwen}
+              onChange={(e) => setNvidiaQwen(e.target.value)}
+              placeholder="nvapi-… (optional — if set, chat uses NVIDIA Qwen 3 Coder)"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-primary)] px-3 py-2 text-sm"
+            />
+            <p className="text-xs text-[var(--text-muted)]">
+              When present, the backtest chat uses{" "}
+              <code className="text-[11px] opacity-90">integrate.api.nvidia.com</code> with{" "}
+              <code className="text-[11px] opacity-90">qwen/qwen3-coder-480b-a35b-instruct</code>. Other
+              features (compliance quiz, CLI, etc.) keep using the provider keys above.
+            </p>
           </div>
           {error && <p className="text-sm text-[var(--error)]">{error}</p>}
           <div className="flex flex-wrap gap-2 pt-2">

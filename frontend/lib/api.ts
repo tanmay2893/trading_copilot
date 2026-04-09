@@ -126,6 +126,7 @@ export interface LlmKeysStatus {
   openai_configured: boolean;
   anthropic_configured: boolean;
   deepseek_configured: boolean;
+  nvidia_qwen_configured: boolean;
 }
 
 export async function fetchLlmKeysStatus(): Promise<LlmKeysStatus> {
@@ -154,10 +155,12 @@ export async function postGlobalLlmKeys(body: {
   openai_api_key: string;
   anthropic_api_key: string;
   deepseek_api_key: string;
+  nvidia_qwen_api_key: string;
 }): Promise<{
   openai: LlmCredentialSideResult;
   anthropic: LlmCredentialSideResult;
   deepseek: LlmCredentialSideResult;
+  nvidia_qwen: LlmCredentialSideResult;
 }> {
   const res = await apiFetch(`${API_BASE}/settings/llm-keys`, {
     method: "POST",

@@ -141,6 +141,7 @@ export function Chat({ sessionId, onOpenChart, getChartScreenshot, onChartDataUp
     llmKeyStatus?.openai_configured,
     llmKeyStatus?.anthropic_configured,
     llmKeyStatus?.deepseek_configured,
+    llmKeyStatus?.nvidia_qwen_configured,
   ]);
 
   const handleLlmModelChange = useCallback(

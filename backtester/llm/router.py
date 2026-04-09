@@ -5,6 +5,7 @@ from backtester.llm.anthropic_provider import AnthropicProvider
 from backtester.llm.model_catalog import resolve_web_api_model
 from backtester.llm.base import BaseLLMProvider
 from backtester.llm.deepseek_provider import DeepSeekProvider
+from backtester.llm.nvidia_qwen_provider import NvidiaQwenProvider
 from backtester.llm.openai_provider import OpenAIProvider
 
 _PROVIDER_LABEL = {
@@ -89,3 +90,17 @@ def get_provider(
     if provider_name == "deepseek":
         return DeepSeekProvider(api_key=api_key, model=model)
     raise ValueError(f"No provider implementation for '{provider_name}'")
+
+
+def get_chat_provider(
+    model_alias: str,
+    *,
+    llm_model_id: str | None = None,
+) -> BaseLLMProvider:
+    """Provider for web chat (WebSocket). If NVIDIA Qwen is configured in Settings, it is always used for chat."""
+    from backtester.api.key_store import get_nvidia_qwen_key
+
+    nvidia_key = get_nvidia_qwen_key().strip()
+    if nvidia_key:
+        return NvidiaQwenProvider(api_key=nvidia_key)
+    return get_provider(model_alias, llm_model_id=llm_model_id)

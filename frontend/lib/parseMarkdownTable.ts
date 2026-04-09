@@ -79,3 +79,18 @@ export function extractMarkdownTable(content: string): MarkdownTableMatch | null
   }
   return null;
 }
+
+/**
+ * Remove every GFM markdown table from content (used when the same data is already
+ * shown as a structured table block from the server to avoid duplicate UI).
+ */
+export function stripAllMarkdownTables(content: string): string {
+  let s = content ?? "";
+  for (let guard = 0; guard < 64; guard++) {
+    const m = extractMarkdownTable(s);
+    if (!m) break;
+    const parts = [m.before, m.after].filter((x) => x && String(x).trim());
+    s = parts.join("\n\n").trim();
+  }
+  return s;
+}

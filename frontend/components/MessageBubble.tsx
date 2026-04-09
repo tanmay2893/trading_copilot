@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ChatMessage, MessageBlock } from "@/lib/types";
 import { fetchStrategyVersionCode, setVersionTag } from "@/lib/api";
-import { extractMarkdownTable } from "@/lib/parseMarkdownTable";
+import { extractMarkdownTable, stripAllMarkdownTables } from "@/lib/parseMarkdownTable";
 import { CodeBlock } from "./CodeBlock";
 import { ProgressStep } from "./ProgressStep";
 import { SignalTable } from "./SignalTable";
@@ -45,6 +45,7 @@ export function MessageBubble({
             versionTags={versionTags}
             versionSources={versionSources}
             onVersionTagged={onVersionTagged}
+            hasStructuredTable={message.blocks.some((b) => b.type === "table")}
           />
         ))}
       </div>
@@ -88,6 +89,7 @@ function BlockRenderer({
   versionTags,
   versionSources,
   onVersionTagged,
+  hasStructuredTable,
 }: {
   block: MessageBlock;
   isUser: boolean;
@@ -95,12 +97,16 @@ function BlockRenderer({
   versionTags: VersionTagsMap;
   versionSources: Record<string, string>;
   onVersionTagged?: (versionId: string, tag: string) => void;
+  /** When true, markdown tables in text are stripped — data tables come from `table` blocks. */
+  hasStructuredTable: boolean;
 }) {
   switch (block.type) {
-    case "text":
-      return (
-        <TextWithTables content={block.content} isUser={isUser} />
-      );
+    case "text": {
+      const raw = block.content ?? "";
+      const content =
+        hasStructuredTable && !isUser ? stripAllMarkdownTables(raw) : raw;
+      return <TextWithTables content={content} isUser={isUser} />;
+    }
 
     case "code":
       return (

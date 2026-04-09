@@ -20,6 +20,7 @@ from backtester.api import key_store
 from backtester.llm.key_verify import (
     verify_anthropic_api_key,
     verify_deepseek_api_key,
+    verify_nvidia_qwen_api_key,
     verify_openai_api_key,
 )
 
@@ -31,11 +32,12 @@ class CreateSessionRequest(BaseModel):
 
 
 class GlobalLLMKeysRequest(BaseModel):
-    """All three fields are sent from Settings. Empty string clears that provider."""
+    """Fields are sent from Settings. Empty string clears that provider."""
 
     openai_api_key: str = ""
     anthropic_api_key: str = ""
     deepseek_api_key: str = ""
+    nvidia_qwen_api_key: str = ""
 
 
 def _apply_global_key(value: str, verify, kind: key_store.KeyKind) -> dict:
@@ -151,6 +153,7 @@ async def post_global_llm_keys(body: GlobalLLMKeysRequest):
         "openai": _apply_global_key(body.openai_api_key, verify_openai_api_key, "openai"),
         "anthropic": _apply_global_key(body.anthropic_api_key, verify_anthropic_api_key, "anthropic"),
         "deepseek": _apply_global_key(body.deepseek_api_key, verify_deepseek_api_key, "deepseek"),
+        "nvidia_qwen": _apply_global_key(body.nvidia_qwen_api_key, verify_nvidia_qwen_api_key, "nvidia_qwen"),
     }
 
 

@@ -19,7 +19,7 @@ from backtester.agent.orchestrator import agent_loop
 from backtester.agent.session import ChatSession
 from backtester.agent.tools import handle_rerun_on_ticker
 from backtester.api.routes import router
-from backtester.llm.router import get_provider
+from backtester.llm.router import get_chat_provider
 
 log = logging.getLogger(__name__)
 
@@ -187,7 +187,7 @@ async def chat_ws(websocket: WebSocket, session_id: str):
                     try:
                         rp = provider
                         if rp is None:
-                            rp = get_provider(session.model, llm_model_id=session.llm_model_id)
+                            rp = get_chat_provider(session.model, llm_model_id=session.llm_model_id)
                             provider = rp
                         suggestions, sug_in, sug_out = generate_follow_up_suggestions(
                             session,
@@ -251,7 +251,7 @@ async def chat_ws(websocket: WebSocket, session_id: str):
 
             if provider is None:
                 try:
-                    provider = get_provider(session.model, llm_model_id=session.llm_model_id)
+                    provider = get_chat_provider(session.model, llm_model_id=session.llm_model_id)
                 except Exception as exc:
                     await websocket.send_json(ErrorEvent(message=f"LLM init failed: {exc}").to_dict())
                     await websocket.send_json(DoneEvent().to_dict())

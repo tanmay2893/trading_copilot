@@ -62,6 +62,14 @@ via NSE (.NS) or BSE (.BO) automatically.
 8. **Tabular signals**: When the user asks for "signals in tabular format", "output
    signals as a table", "list of buy/sell signals" (raw Date/Signal/Price), call
    `get_signals_table`. Do not put signal tables in code blocks.
+   **No duplicate tables:** After you call `get_signals_table`, `get_trades_table`, or
+   `get_backtesting_table`, the UI already shows the interactive table (Copy / Download CSV).
+   Do **not** paste a markdown pipe table or any second table in your message—users will see
+   two tables with conflicting numbers. Reply in plain prose only (counts, first/last dates,
+   interpretation). **Prices in prose:** The tool JSON includes `headers` and `rows` with the
+   exact same values as the on-screen table. You do **not** see the table widget—only this JSON.
+   When you mention any date, price, or P/L figure, **transcribe it from `rows` only** (or omit
+   dollar amounts and say to see the table). Never estimate or recall prices from general knowledge.
 9. **Trades table (profit/loss signal table)**: When the user asks for "entry date, exit date,
    profit/loss", "entry and exit prices", "backtesting data with entry and exit", 
    "trades in tabular format", or "table with entry date, exit date, profit/loss",
@@ -296,8 +304,10 @@ TOOL_SCHEMAS: list[dict] = [
             "name": "get_signals_table",
             "description": (
                 "Return the raw backtest signals (Date, Signal, Price) as a table. "
+                "The tool result JSON includes headers and rows (same values as the UI)—use those for any prices/dates in your text. "
                 "Use only when the user explicitly wants the raw signal list. "
-                "Do NOT use for requests that ask for entry date, exit date, profit/loss—use get_trades_table for those."
+                "Do NOT use for requests that ask for entry date, exit date, profit/loss—use get_trades_table for those. "
+                "Emits the UI table—do not repeat a markdown table in your reply (avoid duplicate/conflicting tables)."
             ),
             "parameters": {
                 "type": "object",
@@ -314,10 +324,12 @@ TOOL_SCHEMAS: list[dict] = [
             "name": "get_trades_table",
             "description": (
                 "Return backtest results as a TRADES table: Entry Date, Exit Date, Entry Price, Exit Price, Signal Type, Profit/Loss (or Profit/Loss %), Days Held. "
+                "The tool result JSON includes headers and rows (same values as the UI)—use those for any prices or P/L in your text. "
                 "The table always includes entry and exit prices. Use when the user asks for 'entry date, exit date, profit/loss', "
                 "'entry and exit prices', 'backtesting data in tabular format with entry and exit', 'trades table', or any request that mentions entry/exit and P&L. "
                 "When the user asks for profit/loss IN PERCENTAGE or 'P&L in %', pass pnl_format='percent'. "
-                "When the user asks for 'P/L with 1 lakh per trade', 'each trade with ₹100000', or 'profit in rupees for 1 lakh', pass capital_per_trade=100000 so the table includes P/L (₹) = (P/L % / 100) × capital for each trade."
+                "When the user asks for 'P/L with 1 lakh per trade', 'each trade with ₹100000', or 'profit in rupees for 1 lakh', pass capital_per_trade=100000 so the table includes P/L (₹) = (P/L % / 100) × capital for each trade. "
+                "Emits the UI table—do not repeat a markdown table in your reply."
             ),
             "parameters": {
                 "type": "object",
@@ -345,7 +357,8 @@ TOOL_SCHEMAS: list[dict] = [
                 "Return the BACKTESTING SUMMARY table: aggregate metrics from all trades. "
                 "Includes: Total Trades, Win Rate (%), Total P/L (price units), Total Return % (sum of trade P/L % — use for capital-based profit: profit in ₹ = (Total Return % / 100) × capital), "
                 "Avg Return % per trade, Total P/L (₹) at ₹100,000/trade, Profit Factor, Best/Worst Trade, etc. "
-                "Use when the user asks for 'backtesting summary', 'win rate', 'profit factor', or aggregate backtest statistics."
+                "Use when the user asks for 'backtesting summary', 'win rate', 'profit factor', or aggregate backtest statistics. "
+                "Emits the UI table—do not repeat a markdown table in your reply."
             ),
             "parameters": {
                 "type": "object",

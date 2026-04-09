@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import math
+import numbers
 import statistics
 import traceback
 import uuid
@@ -1014,7 +1015,13 @@ async def handle_get_trades_table(
             headers=headers,
             rows=[],
         ))
-        return {"success": True, "total_trades": 0, "message": "No complete BUY-SELL pairs in signals."}
+        return {
+            "success": True,
+            "total_trades": 0,
+            "message": "No complete BUY-SELL pairs in signals.",
+            "headers": headers,
+            "rows": [],
+        }
 
     n_total = len(trades_df)
     n_show = min(n_total, limit)
@@ -1038,6 +1045,10 @@ async def handle_get_trades_table(
         "total_trades": n_total,
         "shown": n_show,
         "truncated": n_total > n_show,
+        # Same cells as the UI table — model must cite these, not invent prices.
+        "headers": headers,
+        "rows": rows,
+        "cite_in_text": "Use only dates and prices from headers/rows when stating numbers in your reply.",
     }
 
 
@@ -1534,6 +1545,22 @@ async def handle_get_backtesting_table(
 MAX_SIGNALS_TABLE_ROWS = 500
 
 
+def _fmt_signal_table_cell(val: Any, col: str) -> str:
+    """Stringify DataFrame cells for the signals UI table; round prices for readability."""
+    if val is None:
+        return ""
+    try:
+        if pd.isna(val):
+            return ""
+    except (TypeError, ValueError):
+        pass
+    col_l = col.lower()
+    if isinstance(val, numbers.Real) and not isinstance(val, bool):
+        if "price" in col_l or col_l in ("open", "high", "low", "close"):
+            return f"{float(val):.2f}"
+    return str(val)
+
+
 async def handle_get_signals_table(
     session: ChatSession,
     on_event: Callback,
@@ -1563,7 +1590,7 @@ async def handle_get_signals_table(
     headers = cols
     rows = []
     for _, row in head.iterrows():
-        rows.append([str(row[c]) for c in cols])
+        rows.append([_fmt_signal_table_cell(row[c], c) for c in cols])
 
     await on_event(TableEvent(
         title="Output signals" if n_total <= n_show else f"Output signals (first {n_show} of {n_total})",
@@ -1575,6 +1602,10 @@ async def handle_get_signals_table(
         "total_signals": n_total,
         "shown": n_show,
         "truncated": n_total > n_show,
+        # Same cells as the UI table — the model does not see the WebSocket table; it must use this JSON.
+        "headers": headers,
+        "rows": rows,
+        "cite_in_text": "Use only dates and prices from headers/rows when stating numbers in your reply; do not estimate from memory.",
     }
 
 
